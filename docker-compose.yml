@@ -1,0 +1,151 @@
+version: "3.9"
+
+services:
+  # ─── Flask API Server ─────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: careverify_api
+    command: gunicorn wsgi:app --workers 4 --worker-class gthread --threads 2 --bind 0.0.0.0:5000 --timeout 120 --access-logfile -
+    environment:
+      - FLASK_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - MODEL_DIR=/app/ai/saved_models
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ai/saved_models:/app/ai/saved_models:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Celery AI Worker (GPU-capable) ───────────────────────
+  worker-ai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: careverify_worker_ai
+    command: celery -A celery_worker.celery worker --loglevel=info -Q ai_processing --concurrency=2 --hostname=ai-worker@%h
+    environment:
+      - FLASK_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - MODEL_DIR=/app/ai/saved_models
+    volumes:
+      - ./ai/saved_models:/app/ai/saved_models:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── Celery General Worker ────────────────────────────────
+  worker-general:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: careverify_worker_general
+    command: celery -A celery_worker.celery worker --loglevel=info -Q notifications,audit,default --concurrency=4 --hostname=general-worker@%h
+    environment:
+      - FLASK_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── Celery Beat Scheduler ────────────────────────────────
+  beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: careverify_beat
+    command: celery -A celery_worker.celery beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    environment:
+      - FLASK_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: careverify_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Flower (Celery Monitor) ──────────────────────────────
+  flower:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: careverify_flower
+    command: celery -A celery_worker.celery flower --port=5555 --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD}
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - FLASK_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - worker-ai
+    restart: unless-stopped
+
+  # ─── Nginx Reverse Proxy ──────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: careverify_nginx
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    name: careverify_network

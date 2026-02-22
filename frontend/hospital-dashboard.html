@@ -1,0 +1,2602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>CareVerify AI — Audit Dashboard</title>
+    <meta name="description"
+        content="CareVerify AI hospital billing audit and insurance coverage intelligence dashboard for healthcare finance teams." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+
+            /* =========================
+       BACKGROUNDS
+    ========================== */
+            --bg: #f8faf9;
+            --card-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+
+            /* =========================
+       TYPOGRAPHY
+    ========================== */
+            --text-primary: #059669;
+            --text-secondary: #5c716e;
+
+            /* =========================
+       BRAND COLOR (MATCH LANDING)
+    ========================== */
+            --accent: #059669;
+            --accent-hover: #047857;
+            --accent-soft: #ecfdf5;
+
+            /* =========================
+       STATUS COLORS
+    ========================== */
+            --success: #059669;
+            /* unified green */
+            --warning: #eab308;
+            --danger: #ef4444;
+            --info: #3b82f6;
+
+            /* =========================
+       BORDERS & SHADOWS
+    ========================== */
+            --border: rgba(5, 150, 105, 0.12);
+
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            --shadow-card: 0 10px 24px rgba(0, 0, 0, 0.06);
+
+            /* =========================
+       DESIGN TOKENS
+    ========================== */
+            --radius: 14px;
+
+            /* =========================
+       FONT SYSTEM
+    ========================== */
+            --font: 'Plus Jakarta Sans', 'Nunito Sans', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ── Layout ───────────────────────────────────────── */
+        .dash-wrap {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ──────────────────────────────────────── */
+        .sidebar {
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 1.75rem;
+            padding: 0 0.5rem;
+        }
+
+        .sidebar-logo svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-primary);
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            padding: 0.5rem 0.75rem 0.35rem;
+            margin-top: 0.75rem;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.75rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: background 0.15s, color 0.15s;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item.active {
+            background: rgba(0, 0, 0, 0.06);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .sidebar-badge {
+            margin-left: auto;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 99px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.5rem 0.6rem;
+            border-radius: 10px;
+        }
+
+        .sidebar-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+
+        .sidebar-user-info .name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sidebar-user-info .role {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+        }
+
+        /* ── Main Content ─────────────────────────────────── */
+        .main {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(245, 250, 251, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .topbar-sub {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .topbar-tag {
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 0.3rem 0.75rem;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.03);
+            letter-spacing: 0.04em;
+        }
+
+        .topbar-tag.secure {
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #15803d;
+            background: rgba(34, 197, 94, 0.06);
+        }
+
+        .alert-btn {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .alert-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-secondary);
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .alert-dot {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            border: 2px solid var(--bg);
+        }
+
+        .btn-primary {
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 99px;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+        }
+
+        .content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* ── Section Header ───────────────────────────────── */
+        .section-hdr {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-hdr-left .label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            margin-bottom: 0.2rem;
+        }
+
+        .section-hdr-left .title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .section-hdr-right {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .section-hdr .view-all {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            padding-bottom: 1px;
+            transition: opacity 0.2s;
+        }
+
+        .section-hdr .view-all:hover {
+            opacity: 0.6;
+        }
+
+        /* ── Metrics Strip ────────────────────────────────── */
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.4rem 1.25rem;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.09);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.06), transparent);
+        }
+
+        .metric-card.risk::before {
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.5), transparent);
+        }
+
+        .metric-card.flagged::before {
+            background: linear-gradient(90deg, rgba(234, 179, 8, 0.5), transparent);
+        }
+
+        .metric-card.coverage::before {
+            background: linear-gradient(90deg, rgba(34, 197, 94, 0.5), transparent);
+        }
+
+        .metric-card.exposure::before {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.5), transparent);
+        }
+
+        .metric-card.recovered::before {
+            background: linear-gradient(90deg, rgba(34, 197, 94, 0.7), transparent);
+        }
+
+        .metric-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .metric-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-primary);
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .metric-val {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .metric-context {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 0.6rem;
+        }
+
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .metric-trend.up {
+            color: #ef4444;
+        }
+
+        .metric-trend.down {
+            color: #22c55e;
+        }
+
+        .metric-trend.neutral {
+            color: var(--text-secondary);
+        }
+
+        .trend-arrow {
+            font-size: 0.65rem;
+        }
+
+        /* ── Main Grid ────────────────────────────────────── */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        /* ── Claim Table ──────────────────────────────────── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .card-sub {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-top: 0.1rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .chip {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.25rem 0.65rem;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: transparent;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .chip:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .chip.active {
+            background: rgba(0, 0, 0, 0.07);
+            color: var(--text-primary);
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        thead th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover td {
+            background: rgba(0, 0, 0, 0.015);
+        }
+
+        .claim-id {
+            font-family: monospace;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .dept-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .amount {
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 99px;
+            white-space: nowrap;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.1);
+            color: #b91c1c;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .risk-medium {
+            background: rgba(234, 179, 8, 0.1);
+            color: #92400e;
+            border: 1px solid rgba(234, 179, 8, 0.25);
+        }
+
+        .risk-low {
+            background: rgba(34, 197, 94, 0.1);
+            color: #15803d;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .cov-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .cov-valid {
+            color: #15803d;
+        }
+
+        .cov-mismatch {
+            color: #b91c1c;
+        }
+
+        .cov-pending {
+            color: #92400e;
+        }
+
+        .rej-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rej-bar {
+            height: 5px;
+            border-radius: 99px;
+            background: rgba(0, 0, 0, 0.06);
+            flex: 1;
+            min-width: 50px;
+            overflow: hidden;
+        }
+
+        .rej-fill {
+            height: 100%;
+            border-radius: 99px;
+        }
+
+        .rej-pct {
+            font-size: 0.72rem;
+            font-weight: 700;
+            min-width: 28px;
+            text-align: right;
+        }
+
+        /* ── AI Findings Panel ────────────────────────────── */
+        .findings-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1.25rem;
+        }
+
+        .finding-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .finding-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .finding-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .finding-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .finding-conf {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 99px;
+            white-space: nowrap;
+        }
+
+        .conf-high {
+            background: rgba(239, 68, 68, 0.1);
+            color: #b91c1c;
+        }
+
+        .conf-med {
+            background: rgba(234, 179, 8, 0.1);
+            color: #92400e;
+        }
+
+        .conf-low {
+            background: rgba(34, 197, 94, 0.1);
+            color: #15803d;
+        }
+
+        .finding-reason {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 0.5rem;
+        }
+
+        .finding-action {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .finding-action svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .finding-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+
+        /* ── Secondary Grid ───────────────────────────────── */
+        .secondary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* ── Heatmap ──────────────────────────────────────── */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            padding: 1.25rem;
+        }
+
+        .heatmap-cell {
+            border-radius: 10px;
+            padding: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            transition: transform 0.2s;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.02);
+        }
+
+        .heatmap-dept {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .heatmap-val {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .heatmap-sub {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        .heat-critical {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .heat-high {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+        }
+
+        .heat-medium {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        .heat-low {
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.15);
+        }
+
+        /* ── Provider Panel ───────────────────────────────── */
+        .provider-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 0 0 0.5rem;
+        }
+
+        .provider-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            transition: background 0.15s;
+        }
+
+        .provider-row:last-child {
+            border-bottom: none;
+        }
+
+        .provider-row:hover {
+            background: rgba(0, 0, 0, 0.015);
+        }
+
+        .provider-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .provider-stats {
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .pstat {
+            text-align: right;
+        }
+
+        .pstat-val {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .pstat-label {
+            font-size: 0.62rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .approval-bar-wrap {
+            width: 80px;
+        }
+
+        .approval-bar {
+            height: 5px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .approval-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: #22c55e;
+        }
+
+        /* ── Claim Lifecycle ──────────────────────────────── */
+        .lifecycle-wrap {
+            padding: 1.5rem 1.75rem;
+        }
+
+        .lifecycle-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .lc-chip {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.3rem 0.75rem;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            background: transparent;
+            font-family: var(--font);
+            transition: all 0.15s;
+        }
+
+        .lc-chip.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .lifecycle-stages {
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+            gap: 0;
+        }
+
+        .lc-stage {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .lc-line {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.08);
+            z-index: 0;
+        }
+
+        .lc-stage:last-child .lc-line {
+            display: none;
+        }
+
+        .lc-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0.6rem;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .lc-dot svg {
+            width: 13px;
+            height: 13px;
+            stroke: var(--text-secondary);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .lc-stage.done .lc-dot {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .lc-stage.done .lc-dot svg {
+            stroke: #fff;
+        }
+
+        .lc-stage.done .lc-line {
+            background: rgba(34, 197, 94, 0.4);
+        }
+
+        .lc-stage.active .lc-dot {
+            background: #000;
+            border-color: #000;
+        }
+
+        .lc-stage.active .lc-dot svg {
+            stroke: #fff;
+        }
+
+        .lc-stage-name {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .lc-stage.done .lc-stage-name,
+        .lc-stage.active .lc-stage-name {
+            color: var(--text-primary);
+        }
+
+        .lc-stage-time {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        /* ── Compliance Review ────────────────────────────── */
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .review-row {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 1rem;
+            align-items: center;
+            transition: background 0.15s;
+        }
+
+        .review-row:last-child {
+            border-bottom: none;
+        }
+
+        .review-row:hover {
+            background: rgba(0, 0, 0, 0.015);
+        }
+
+        .rev-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .rev-status.pending {
+            background: #eab308;
+        }
+
+        .rev-status.review {
+            background: #3b82f6;
+        }
+
+        .rev-status.cleared {
+            background: #22c55e;
+        }
+
+        .rev-info .claim {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: monospace;
+        }
+
+        .rev-info .desc {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.1rem;
+        }
+
+        .rev-conf {
+            text-align: center;
+        }
+
+        .rev-conf-val {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .rev-conf-label {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        .rev-action {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.3rem 0.7rem;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            background: transparent;
+            font-family: var(--font);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .rev-action:hover {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* ── AI Engine Banner ─────────────────────────────── */
+        .engine-banner {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .engine-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .engine-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .engine-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .engine-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.4rem;
+        }
+
+        .engine-tag {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .engine-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pdot 2s infinite;
+        }
+
+        @keyframes pdot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(1.5);
+            }
+        }
+
+        .engine-status {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ── Footer ───────────────────────────────────────── */
+        .dash-footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .footer-meta {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-tags {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .footer-tag {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        /* ── Greeting Bar ──────────────────────────────── */
+        .greeting-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.9rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-card);
+        }
+
+        .greeting-text {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .greeting-text span {
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .greeting-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* ── Focus Mode Toggle ────────────────────────── */
+        .focus-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .focus-toggle-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+        }
+
+        .focus-toggle-switch {
+            width: 32px;
+            height: 18px;
+            border-radius: 99px;
+            background: rgba(0, 0, 0, 0.12);
+            position: relative;
+            transition: background 0.25s;
+            flex-shrink: 0;
+        }
+
+        .focus-toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.25s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .focus-toggle.on .focus-toggle-switch {
+            background: #000;
+        }
+
+        .focus-toggle.on .focus-toggle-switch::after {
+            transform: translateX(14px);
+        }
+
+        .focus-toggle.on .focus-toggle-label {
+            color: var(--text-primary);
+        }
+
+        /* Focus mode: hide low-risk rows */
+        body.focus-mode .low-risk-row {
+            display: none;
+        }
+
+        body.focus-mode .focus-hidden {
+            display: none;
+        }
+
+        /* ── Secondary Metrics ────────────────────────── */
+        .metrics-secondary {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 0.85rem 0 0;
+            border-top: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        .sec-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .sec-metric-val {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .sec-metric-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sec-metric-desc {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        /* ── Priority Label (table) ───────────────────── */
+        .priority-label {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            margin-bottom: 0.15rem;
+        }
+
+        .priority-critical {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+        }
+
+        .priority-moderate {
+            background: rgba(234, 179, 8, 0.12);
+            color: #92400e;
+        }
+
+        .priority-low {
+            background: rgba(34, 197, 94, 0.08);
+            color: #15803d;
+        }
+
+        /* ── Tooltip hint ─────────────────────────────── */
+        .tooltip-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .tooltip-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.08);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            cursor: help;
+            flex-shrink: 0;
+        }
+
+        .tooltip-box {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 500;
+            padding: 0.4rem 0.65rem;
+            border-radius: 7px;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            line-height: 1.4;
+        }
+
+        .tooltip-wrap:hover .tooltip-box {
+            display: block;
+        }
+
+        /* ── Action button in findings ────────────────── */
+        .btn-finding-action {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.35rem 0.85rem;
+            border-radius: 99px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .btn-finding-action:hover {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .findings-footer {
+            padding: 0.5rem 1.25rem 1.25rem;
+            text-align: center;
+        }
+
+        .findings-footer a {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            padding-bottom: 1px;
+        }
+
+        .findings-footer a:hover {
+            opacity: 0.7;
+        }
+
+        /* ── Next Actions Panel ───────────────────────── */
+        .next-actions-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .next-actions-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .next-actions-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .next-actions-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.1rem;
+        }
+
+        .next-actions-tag {
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 99px;
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .next-action-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .next-action-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+
+        .next-action-item:hover {
+            background: rgba(0, 0, 0, 0.025);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .next-action-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .next-action-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .next-action-sub {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            margin-top: 0.1rem;
+        }
+
+        .next-action-cta {
+            margin-left: auto;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            align-self: center;
+            flex-shrink: 0;
+        }
+
+        @media(max-width:900px) {
+            .dash-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .metrics-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-grid,
+            .secondary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dash-wrap">
+
+        <!-- ── Sidebar ─────────────────────────────────────── -->
+        <aside class="sidebar">
+            <a style="color:#171717" class="sidebar-logo" href="index .html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+                CareVerify
+            </a>
+
+            <span class="sidebar-section">Hospital</span>
+            <a class="sidebar-item active" href="hospital-dashboard.html">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+                Dashboard
+            </a>
+            <a class="sidebar-item" href="claim-flow.html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                </svg>
+                Claims
+            </a>
+            <a class="sidebar-item" href="review-queue.html">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                Review Queue
+                <span class="sidebar-badge">6</span>
+            </a>
+
+            <span class="sidebar-section">Insights</span>
+            <a class="sidebar-item" href="analytics.html">
+                <svg viewBox="0 0 24 24">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+                Analytics
+            </a>
+            <a class="sidebar-item" href="risk-scoring.html">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                Risk Scoring
+            </a>
+
+            <span class="sidebar-section">Account</span>
+            <a class="sidebar-item" href="index .html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Logout
+            </a>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar" style="background:var(--accent-soft);color:var(--text-primary);">HU
+                    </div>
+                    <div class="sidebar-user-info">
+                        <div class="name">Hospital Staff</div>
+                        <div class="role">Billing Operations</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── Main ─────────────────────────────────────────── -->
+        <main class="main">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <span class="topbar-title">Billing Audit Dashboard</span>
+                    <span class="topbar-sub">Cycle: Q1 2026 &nbsp;·&nbsp; Last synced 4 min ago &nbsp;·&nbsp;
+                        Multi-Specialty Hospital Network</span>
+                </div>
+                <div class="topbar-right">
+                    <span class="topbar-tag secure">&#9679; Secure Pipeline Active</span>
+                    <div class="alert-btn">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <div class="alert-dot"></div>
+                    </div>
+                    <button class="btn-primary">Export Report</button>
+                </div>
+            </div>
+
+            <div class="content">
+
+                <!-- ── Greeting Bar ──────────────────────────────── -->
+                <div class="greeting-bar">
+                    <div>
+                        <div class="greeting-text">Good morning, Admin. &nbsp;<span>6 claims require your attention
+                                today.</span></div>
+                    </div>
+                    <div class="greeting-actions">
+                        <div class="focus-toggle" id="focusToggle" onclick="toggleFocusMode(this)"
+                            title="Show only high-risk claims">
+                            <span class="focus-toggle-label">Focus Mode</span>
+                            <div class="focus-toggle-switch"></div>
+                        </div>
+                        <span style="font-size:0.7rem;color:var(--text-secondary);">Q1 2026 &nbsp;·&nbsp; 3,847
+                            processed</span>
+                    </div>
+                </div>
+
+                <!-- ── AI Engine Banner ──────────────────────────── -->
+                <div class="engine-banner">
+                    <div class="engine-left">
+                        <span class="engine-label">Intelligence Engine</span>
+                        <span class="engine-title">AI Claim Intelligence Engine</span>
+                        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.15rem;font-weight:500;">
+                            Predict &rarr; Validate &rarr; Prevent Revenue Leakage</div>
+                        <div class="engine-tags" style="margin-top:0.55rem;">
+                            <span class="engine-tag">Predictive Rejection Forecasting</span>
+                            <span class="engine-tag">Real-Time Policy Validation</span>
+                            <span class="engine-tag">Explainable AI Audit Logs</span>
+                        </div>
+                    </div>
+                    <div class="engine-right">
+                        <div style="text-align:right;">
+                            <div style="display:flex;align-items:center;gap:0.5rem;justify-content:flex-end;">
+                                <div class="pulse-dot"></div>
+                                <span class="engine-status">Engine Running</span>
+                            </div>
+                            <div
+                                style="font-size:0.65rem;color:var(--text-secondary);margin-top:0.3rem;font-style:italic;">
+                                Engine Status: Active &amp; Learning</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Metrics Strip ─────────────────────────────── -->
+                <div>
+                    <div class="section-hdr">
+                        <div class="section-hdr-left">
+                            <div class="label">Overview</div>
+                            <div class="title">Financial Risk Intelligence</div>
+                        </div>
+                    </div>
+                    <!-- Primary Metrics -->
+                    <div class="metrics-strip" style="grid-template-columns:repeat(4,1fr);">
+                        <div class="metric-card risk">
+                            <div class="metric-icon"><svg viewBox="0 0 24 24">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                                </svg></div>
+                            <div class="metric-val">78<span style="font-size:1rem">%</span></div>
+                            <div class="metric-label">Risk Index</div>
+                            <div class="metric-context">Overall financial risk across active claims</div>
+                            <div class="metric-trend up"><span class="trend-arrow">&#8593;</span> +6.2% vs last cycle
+                            </div>
+                        </div>
+                        <div class="metric-card flagged">
+                            <div class="metric-icon"><svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                </svg></div>
+                            <div class="metric-val">6</div>
+                            <div class="metric-label">Claims Requiring Action</div>
+                            <div class="metric-context">High-risk claims awaiting review</div>
+                            <div class="metric-trend up"><span class="trend-arrow">&#8593;</span> 3 critical, 3 moderate
+                            </div>
+                        </div>
+                        <div class="metric-card exposure">
+                            <div class="metric-icon"><svg viewBox="0 0 24 24">
+                                    <line x1="12" y1="1" x2="12" y2="23" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg></div>
+                            <div class="metric-val" style="font-size:1.4rem">&#8377;1.2Cr</div>
+                            <div class="metric-label">Financial Exposure</div>
+                            <div class="metric-context">Potential revenue loss in active claims</div>
+                            <div class="metric-trend up"><span class="trend-arrow">&#8593;</span> &#8377;18L more than
+                                last cycle</div>
+                        </div>
+                        <div class="metric-card recovered">
+                            <div class="metric-icon"><svg viewBox="0 0 24 24">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                    <polyline points="17 6 23 6 23 12" />
+                                </svg></div>
+                            <div class="metric-val" style="font-size:1.4rem">&#8377;74L</div>
+                            <div class="metric-label">Revenue Protected</div>
+                            <div class="metric-context">Leakage stopped by AI before submission</div>
+                            <div class="metric-trend down"><span class="trend-arrow">&#8595;</span> &#8377;12L net
+                                recovery gain</div>
+                        </div>
+                    </div>
+                    <!-- Secondary Metrics -->
+                    <div class="metrics-secondary">
+                        <div class="sec-metric">
+                            <div class="sec-metric-val">84%</div>
+                            <div class="sec-metric-label">Coverage Match Rate</div>
+                            <div class="sec-metric-desc">Claims aligned with policy rules</div>
+                        </div>
+                        <div class="sec-metric">
+                            <div class="sec-metric-val">3,847</div>
+                            <div class="sec-metric-label">Claim Volume</div>
+                            <div class="sec-metric-desc">Processed this quarter</div>
+                        </div>
+                        <div class="sec-metric">
+                            <div class="sec-metric-val" style="color:#b91c1c;">&#8593; 6.2%</div>
+                            <div class="sec-metric-label">Cycle Trend</div>
+                            <div class="sec-metric-desc">Risk growth vs last cycle</div>
+                        </div>
+                        <div class="sec-metric">
+                            <div class="sec-metric-val">214</div>
+                            <div class="sec-metric-label">Total Flagged</div>
+                            <div class="sec-metric-desc">All risk levels, Q1 2026</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Main Claim Intelligence Grid ─────────────── -->
+                <div class="main-grid">
+                    <!-- Claim Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Priority Claims Requiring Attention</div>
+                                <div class="card-sub">Top 5 high-risk claims &mdash; sorted by rejection probability
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="chip active" onclick="filterTable('all',this)">All</button>
+                                <button class="chip" onclick="filterTable('high',this)">Critical</button>
+                                <button class="chip" onclick="filterTable('medium',this)">Moderate</button>
+                                <a href="#" class="view-all" style="margin-left:0.25rem;">View All Claims</a>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Priority / Claim</th>
+                                        <th>Department</th>
+                                        <th>Procedure</th>
+                                        <th>Amount</th>
+                                        <th>
+                                            <div class="tooltip-wrap">Risk Level<span class="tooltip-icon">?</span>
+                                                <div class="tooltip-box">AI-assessed risk: High = immediate action
+                                                    needed<br>Medium = review recommended · Low = minimal risk</div>
+                                            </div>
+                                        </th>
+                                        <th>Coverage</th>
+                                        <th>
+                                            <div class="tooltip-wrap">Rejection Prob.<span class="tooltip-icon">?</span>
+                                                <div class="tooltip-box">Likelihood this claim will be rejected by
+                                                    payer,<br>based on 1,240+ historical submissions.</div>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="claim-tbody">
+                                    <tr data-risk="high">
+                                        <td>
+                                            <div><span class="priority-label priority-critical">Critical</span></div>
+                                            <span class="claim-id">CLM-7769</span>
+                                        </td>
+                                        <td><span class="dept-tag">Surgery</span></td>
+                                        <td style="font-size:0.78rem;color:var(--text-secondary);max-width:160px;">CPT
+                                            27447 — Total knee arthroplasty</td>
+                                        <td><span class="amount">&#8377;4,35,000</span></td>
+                                        <td><span class="risk-badge risk-high">&#9679; High</span></td>
+                                        <td><span class="cov-badge cov-mismatch">Cap Exceeded</span></td>
+                                        <td>
+                                            <div class="rej-bar-wrap">
+                                                <div class="rej-bar">
+                                                    <div class="rej-fill" style="width:83%;background:#ef4444;"></div>
+                                                </div><span class="rej-pct" style="color:#b91c1c;">83%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr data-risk="high">
+                                        <td>
+                                            <div><span class="priority-label priority-critical">Critical</span></div>
+                                            <span class="claim-id">CLM-7743</span>
+                                        </td>
+                                        <td><span class="dept-tag">Oncology</span></td>
+                                        <td style="font-size:0.78rem;color:var(--text-secondary);max-width:160px;">CPT
+                                            96413 — Chemo admin, 1hr infusion</td>
+                                        <td><span class="amount">&#8377;1,24,500</span></td>
+                                        <td><span class="risk-badge risk-high">&#9679; High</span></td>
+                                        <td><span class="cov-badge cov-mismatch">Policy Mismatch</span></td>
+                                        <td>
+                                            <div class="rej-bar-wrap">
+                                                <div class="rej-bar">
+                                                    <div class="rej-fill" style="width:78%;background:#ef4444;"></div>
+                                                </div><span class="rej-pct" style="color:#b91c1c;">78%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr data-risk="high">
+                                        <td>
+                                            <div><span class="priority-label priority-critical">Critical</span></div>
+                                            <span class="claim-id">CLM-7791</span>
+                                        </td>
+                                        <td><span class="dept-tag">Nephrology</span></td>
+                                        <td style="font-size:0.78rem;color:var(--text-secondary);max-width:160px;">CPT
+                                            90935 — Hemodialysis (duplicate)</td>
+                                        <td><span class="amount">&#8377;28,000</span></td>
+                                        <td><span class="risk-badge risk-high">&#9679; High</span></td>
+                                        <td><span class="cov-badge cov-mismatch">Duplicate Detected</span></td>
+                                        <td>
+                                            <div class="rej-bar-wrap">
+                                                <div class="rej-bar">
+                                                    <div class="rej-fill" style="width:71%;background:#ef4444;"></div>
+                                                </div><span class="rej-pct" style="color:#b91c1c;">71%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr data-risk="medium">
+                                        <td>
+                                            <div><span class="priority-label priority-moderate">Moderate</span></div>
+                                            <span class="claim-id">CLM-7751</span>
+                                        </td>
+                                        <td><span class="dept-tag">Cardiology</span></td>
+                                        <td style="font-size:0.78rem;color:var(--text-secondary);max-width:160px;">CPT
+                                            93458 — Cardiac catheterization</td>
+                                        <td><span class="amount">&#8377;2,18,000</span></td>
+                                        <td><span class="risk-badge risk-medium">&#9679; Medium</span></td>
+                                        <td><span class="cov-badge cov-pending">Validation Pending</span></td>
+                                        <td>
+                                            <div class="rej-bar-wrap">
+                                                <div class="rej-bar">
+                                                    <div class="rej-fill" style="width:54%;background:#eab308;"></div>
+                                                </div><span class="rej-pct" style="color:#92400e;">54%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr data-risk="medium" class="low-risk-row">
+                                        <td>
+                                            <div><span class="priority-label priority-moderate">Moderate</span></div>
+                                            <span class="claim-id">CLM-7780</span>
+                                        </td>
+                                        <td><span class="dept-tag">Orthopedics</span></td>
+                                        <td style="font-size:0.78rem;color:var(--text-secondary);max-width:160px;">CPT
+                                            29881 — Knee arthroscopy</td>
+                                        <td><span class="amount">&#8377;1,87,500</span></td>
+                                        <td><span class="risk-badge risk-medium">&#9679; Medium</span></td>
+                                        <td><span class="cov-badge cov-pending">Validation Pending</span></td>
+                                        <td>
+                                            <div class="rej-bar-wrap">
+                                                <div class="rej-bar">
+                                                    <div class="rej-fill" style="width:47%;background:#eab308;"></div>
+                                                </div><span class="rej-pct" style="color:#92400e;">47%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr data-risk="low" class="low-risk-row">
+                                        <td>
+                                            <div><span class="priority-label priority-low">Low</span></div><span
+                                                class="claim-id">CLM-7762</span>
+                                        </td>
+                                        <td><span class="dept-tag">Radiology</span></td>
+                                        <td style="font-size:0.78rem;color:var(--text-secondary);max-width:160px;">CPT
+                                            74178 — CT abdomen, with contrast</td>
+                                        <td><span class="amount">&#8377;68,200</span></td>
+                                        <td><span class="risk-badge risk-low">&#9679; Low</span></td>
+                                        <td><span class="cov-badge cov-valid">Coverage Valid</span></td>
+                                        <td>
+                                            <div class="rej-bar-wrap">
+                                                <div class="rej-bar">
+                                                    <div class="rej-fill" style="width:12%;background:#22c55e;"></div>
+                                                </div><span class="rej-pct" style="color:#15803d;">12%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div
+                                style="padding:0.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                                <span style="font-size:0.7rem;color:var(--text-secondary);">Showing top 5 high-risk
+                                    claims. <a href="#" class="view-all" style="font-size:0.7rem;">View all 214 flagged
+                                        claims &rarr;</a></span>
+                                <span style="font-size:0.68rem;color:var(--text-secondary);">Sorted by rejection
+                                    probability</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Findings Panel -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">AI Insight Summary</div>
+                                <div class="card-sub">Top 3 active findings &mdash; immediate action required</div>
+                            </div>
+                        </div>
+                        <div class="findings-panel">
+
+                            <div class="finding-card">
+                                <div class="finding-top">
+                                    <div style="display:flex;gap:0.5rem;align-items:flex-start;">
+                                        <div class="finding-dot" style="background:#ef4444;margin-top:4px;"></div>
+                                        <div class="finding-title">Duplicate CPT Code</div>
+                                    </div>
+                                    <span class="finding-conf conf-high">92%</span>
+                                </div>
+                                <p class="finding-reason">Same CPT 90935 billed twice for one patient within 48 hrs
+                                    (CLM-7791).</p>
+                                <div style="font-size:0.7rem;font-weight:700;color:#b91c1c;margin-bottom:0.4rem;">
+                                    Impact: &#8377;28,000 at rejection risk</div>
+                                <button class="btn-finding-action"
+                                    onclick="showToast('CLM-7791 — Merge action initiated.')">Merge &amp;
+                                    Resubmit</button>
+                            </div>
+
+                            <div class="finding-card">
+                                <div class="finding-top">
+                                    <div style="display:flex;gap:0.5rem;align-items:flex-start;">
+                                        <div class="finding-dot" style="background:#ef4444;margin-top:4px;"></div>
+                                        <div class="finding-title">Policy Cap Exceeded</div>
+                                    </div>
+                                    <span class="finding-conf conf-high">88%</span>
+                                </div>
+                                <p class="finding-reason">CLM-7769 exceeds BCBS-IL surgery cap by &#8377;85,000.</p>
+                                <div style="font-size:0.7rem;font-weight:700;color:#b91c1c;margin-bottom:0.4rem;">
+                                    Impact: &#8377;85,000 over policy limit</div>
+                                <button class="btn-finding-action"
+                                    onclick="showToast('CLM-7769 — Auth amendment initiated.')">Request Auth
+                                    Amendment</button>
+                            </div>
+
+                            <div class="finding-card">
+                                <div class="finding-top">
+                                    <div style="display:flex;gap:0.5rem;align-items:flex-start;">
+                                        <div class="finding-dot" style="background:#eab308;margin-top:4px;"></div>
+                                        <div class="finding-title">Oncology Billing Spike</div>
+                                    </div>
+                                    <span class="finding-conf conf-med">74%</span>
+                                </div>
+                                <p class="finding-reason">Oncology volume up 34% in 14 days — upcoding pattern on 6
+                                    chemo codes.</p>
+                                <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:0.4rem;">
+                                    Impact: Estimated &#8377;18L leakage risk</div>
+                                <button class="btn-finding-action"
+                                    onclick="showToast('Oncology audit review initiated.')">Initiate Audit
+                                    Review</button>
+                            </div>
+
+                        </div>
+                        <div class="findings-footer">
+                            <a href="#">View Detailed Audit Log &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Recommended Next Actions ────────────────── -->
+                <div class="next-actions-card">
+                    <div class="next-actions-header">
+                        <div>
+                            <div class="next-actions-title">Recommended Next Actions</div>
+                            <div class="next-actions-subtitle">Auto-generated by AI intelligence engine
+                                &nbsp;&middot;&nbsp; Updated 4 min ago</div>
+                        </div>
+                        <span class="next-actions-tag">6 pending</span>
+                    </div>
+                    <div class="next-action-list">
+                        <div class="next-action-item" onclick="showToast('Navigating to Oncology review queue...')">
+                            <div class="next-action-bullet" style="background:#ef4444;"></div>
+                            <div>
+                                <div class="next-action-text">Review 3 high-risk Oncology claims</div>
+                                <div class="next-action-sub">CLM-7743 and 2 others &nbsp;&middot;&nbsp; Policy mismatch
+                                    &amp; upcoding flags</div>
+                            </div>
+                            <span class="next-action-cta">Review &rarr;</span>
+                        </div>
+                        <div class="next-action-item" onclick="showToast('Escalating cap-exceeded claims...')">
+                            <div class="next-action-bullet" style="background:#ef4444;"></div>
+                            <div>
+                                <div class="next-action-text">Escalate 2 cap-exceeded cases</div>
+                                <div class="next-action-sub">CLM-7769 (Surgery) &nbsp;&middot;&nbsp; Requires senior
+                                    compliance sign-off</div>
+                            </div>
+                            <span class="next-action-cta">Escalate &rarr;</span>
+                        </div>
+                        <div class="next-action-item"
+                            onclick="showToast('CLM-7751 — Prior auth validation initiated.')">
+                            <div class="next-action-bullet" style="background:#eab308;"></div>
+                            <div>
+                                <div class="next-action-text">Validate prior authorization for Cardiology claim</div>
+                                <div class="next-action-sub">CLM-7751 &nbsp;&middot;&nbsp; Missing auth reference for
+                                    Star Health network</div>
+                            </div>
+                            <span class="next-action-cta">Validate &rarr;</span>
+                        </div>
+                        <div class="next-action-item focus-hidden"
+                            onclick="showToast('CLM-7791 — Merge in progress...')">
+                            <div class="next-action-bullet" style="background:#eab308;"></div>
+                            <div>
+                                <div class="next-action-text">Merge duplicate Nephrology claim</div>
+                                <div class="next-action-sub">CLM-7791 &nbsp;&middot;&nbsp; CPT 90935 duplicate detected
+                                </div>
+                            </div>
+                            <span class="next-action-cta">Merge &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Secondary Grid: Heatmap + Provider ──────── -->
+                <div class="secondary-grid">
+
+                    <!-- Department Risk Heatmap -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Department Risk Heatmap</div>
+                                <div class="card-sub">Financial exposure by specialty &nbsp;·&nbsp; Anomaly distribution
+                                    analysis</div>
+                            </div>
+                            <span class="section-hdr-right">Q1 2026</span>
+                        </div>
+                        <div class="heatmap-grid">
+                            <div class="heatmap-cell heat-critical">
+                                <div class="heatmap-dept">Oncology</div>
+                                <div class="heatmap-val">&#8377;42L</div>
+                                <div class="heatmap-sub">Risk: Critical &nbsp;·&nbsp; 38 flags</div>
+                            </div>
+                            <div class="heatmap-cell heat-critical">
+                                <div class="heatmap-dept">Surgery</div>
+                                <div class="heatmap-val">&#8377;38L</div>
+                                <div class="heatmap-sub">Risk: Critical &nbsp;·&nbsp; 29 flags</div>
+                            </div>
+                            <div class="heatmap-cell heat-high">
+                                <div class="heatmap-dept">Cardiology</div>
+                                <div class="heatmap-val">&#8377;31L</div>
+                                <div class="heatmap-sub">Risk: High &nbsp;·&nbsp; 22 flags</div>
+                            </div>
+                            <div class="heatmap-cell heat-high">
+                                <div class="heatmap-dept">Nephrology</div>
+                                <div class="heatmap-val">&#8377;19L</div>
+                                <div class="heatmap-sub">Risk: High &nbsp;·&nbsp; 17 flags</div>
+                            </div>
+                            <div class="heatmap-cell heat-medium">
+                                <div class="heatmap-dept">Orthopedics</div>
+                                <div class="heatmap-val">&#8377;14L</div>
+                                <div class="heatmap-sub">Risk: Medium &nbsp;·&nbsp; 11 flags</div>
+                            </div>
+                            <div class="heatmap-cell heat-medium">
+                                <div class="heatmap-dept">Neurology</div>
+                                <div class="heatmap-val">&#8377;9L</div>
+                                <div class="heatmap-sub">Risk: Medium &nbsp;·&nbsp; 8 flags</div>
+                            </div>
+                            <div class="heatmap-cell heat-low">
+                                <div class="heatmap-dept">Radiology</div>
+                                <div class="heatmap-val">&#8377;5L</div>
+                                <div class="heatmap-sub">Risk: Low &nbsp;·&nbsp; 4 flags</div>
+                            </div>
+                            <div class="heatmap-cell heat-low">
+                                <div class="heatmap-dept">Endocrinology</div>
+                                <div class="heatmap-val">&#8377;3L</div>
+                                <div class="heatmap-sub">Risk: Low &nbsp;·&nbsp; 2 flags</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insurance Provider Performance -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Insurance Provider Performance</div>
+                                <div class="card-sub">Approval rates &nbsp;·&nbsp; Processing latency &nbsp;·&nbsp;
+                                    Rejection pattern summary</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div
+                                style="display:grid;grid-template-columns:1fr auto auto auto;gap:0.5rem;padding:0.6rem 1.5rem;border-bottom:1px solid var(--border);">
+                                <span
+                                    style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;">Provider</span>
+                                <span
+                                    style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;text-align:right;">Approval</span>
+                                <span
+                                    style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;text-align:right;">Avg.
+                                    Days</span>
+                                <span
+                                    style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;text-align:right;">Rejections</span>
+                            </div>
+                            <div class="provider-list">
+                                <div class="provider-row">
+                                    <div class="provider-name">
+                                        Star Health &amp; Allied<br>
+                                        <span
+                                            style="font-size:0.68rem;color:var(--text-secondary);font-weight:500;">Primary
+                                            network payer</span>
+                                    </div>
+                                    <div class="provider-stats">
+                                        <div class="pstat">
+                                            <div class="pstat-val">91%</div>
+                                            <div class="approval-bar-wrap">
+                                                <div class="approval-bar">
+                                                    <div class="approval-fill" style="width:91%;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="pstat" style="min-width:52px;">
+                                            <div class="pstat-val">3.2d</div>
+                                            <div class="pstat-label">Process</div>
+                                        </div>
+                                        <div class="pstat" style="min-width:40px;">
+                                            <div class="pstat-val" style="color:#b91c1c;">84</div>
+                                            <div class="pstat-label">Rejects</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="provider-row">
+                                    <div class="provider-name">
+                                        BCBS Illinois PPO<br>
+                                        <span
+                                            style="font-size:0.68rem;color:var(--text-secondary);font-weight:500;">Secondary
+                                            network payer</span>
+                                    </div>
+                                    <div class="provider-stats">
+                                        <div class="pstat">
+                                            <div class="pstat-val">79%</div>
+                                            <div class="approval-bar-wrap">
+                                                <div class="approval-bar">
+                                                    <div class="approval-fill" style="width:79%;background:#eab308;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="pstat" style="min-width:52px;">
+                                            <div class="pstat-val">5.8d</div>
+                                            <div class="pstat-label">Process</div>
+                                        </div>
+                                        <div class="pstat" style="min-width:40px;">
+                                            <div class="pstat-val" style="color:#b91c1c;">143</div>
+                                            <div class="pstat-label">Rejects</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="provider-row">
+                                    <div class="provider-name">
+                                        United Health Group<br>
+                                        <span
+                                            style="font-size:0.68rem;color:var(--text-secondary);font-weight:500;">Tertiary
+                                            network payer</span>
+                                    </div>
+                                    <div class="provider-stats">
+                                        <div class="pstat">
+                                            <div class="pstat-val">85%</div>
+                                            <div class="approval-bar-wrap">
+                                                <div class="approval-bar">
+                                                    <div class="approval-fill" style="width:85%;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="pstat" style="min-width:52px;">
+                                            <div class="pstat-val">4.1d</div>
+                                            <div class="pstat-label">Process</div>
+                                        </div>
+                                        <div class="pstat" style="min-width:40px;">
+                                            <div class="pstat-val" style="color:#b91c1c;">97</div>
+                                            <div class="pstat-label">Rejects</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="provider-row">
+                                    <div class="provider-name">
+                                        Aditya Birla Health<br>
+                                        <span
+                                            style="font-size:0.68rem;color:var(--text-secondary);font-weight:500;">Government
+                                            scheme payer</span>
+                                    </div>
+                                    <div class="provider-stats">
+                                        <div class="pstat">
+                                            <div class="pstat-val">67%</div>
+                                            <div class="approval-bar-wrap">
+                                                <div class="approval-bar">
+                                                    <div class="approval-fill" style="width:67%;background:#ef4444;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="pstat" style="min-width:52px;">
+                                            <div class="pstat-val">8.4d</div>
+                                            <div class="pstat-label">Process</div>
+                                        </div>
+                                        <div class="pstat" style="min-width:40px;">
+                                            <div class="pstat-val" style="color:#b91c1c;">211</div>
+                                            <div class="pstat-label">Rejects</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Claim Lifecycle Timeline ───────────────────── -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Claim Lifecycle Visibility</div>
+                            <div class="card-sub">End-to-end audit trail &nbsp;·&nbsp; Audit-ready logging &nbsp;·&nbsp;
+                                Stage-level compliance checkpoints</div>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#" class="view-all">Full lifecycle log</a>
+                        </div>
+                    </div>
+                    <div class="lifecycle-wrap">
+                        <div class="lifecycle-selector">
+                            <button class="lc-chip active" onclick="selectClaim(this,'CLM-7743')">CLM-7743</button>
+                            <button class="lc-chip" onclick="selectClaim(this,'CLM-7751')">CLM-7751</button>
+                            <button class="lc-chip" onclick="selectClaim(this,'CLM-7769')">CLM-7769</button>
+                            <button class="lc-chip" onclick="selectClaim(this,'CLM-7774')">CLM-7774</button>
+                            <button class="lc-chip" onclick="selectClaim(this,'CLM-7791')">CLM-7791</button>
+                        </div>
+                        <div class="lifecycle-stages" id="lifecycle-stages">
+                            <div class="lc-stage done">
+                                <div class="lc-dot"><svg viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div>
+                                <div class="lc-line"></div>
+                                <div class="lc-stage-name">Bill Generated</div>
+                                <div class="lc-stage-time">Feb 18, 09:12</div>
+                            </div>
+                            <div class="lc-stage done">
+                                <div class="lc-dot"><svg viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div>
+                                <div class="lc-line"></div>
+                                <div class="lc-stage-name">AI Risk Analysis</div>
+                                <div class="lc-stage-time">Feb 18, 09:13</div>
+                            </div>
+                            <div class="lc-stage done">
+                                <div class="lc-dot"><svg viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div>
+                                <div class="lc-line"></div>
+                                <div class="lc-stage-name">Coverage Validation</div>
+                                <div class="lc-stage-time">Feb 18, 09:47</div>
+                            </div>
+                            <div class="lc-stage active">
+                                <div class="lc-dot"><svg viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="4" />
+                                    </svg></div>
+                                <div class="lc-line"></div>
+                                <div class="lc-stage-name">Compliance Review</div>
+                                <div class="lc-stage-time">In progress</div>
+                            </div>
+                            <div class="lc-stage">
+                                <div class="lc-dot"><svg viewBox="0 0 24 24">
+                                        <polyline points="22 2 15 22 11 13 2 9 22 2" />
+                                    </svg></div>
+                                <div class="lc-line"></div>
+                                <div class="lc-stage-name">Claim Submission</div>
+                                <div class="lc-stage-time">Pending</div>
+                            </div>
+                            <div class="lc-stage">
+                                <div class="lc-dot"><svg viewBox="0 0 24 24">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    </svg></div>
+                                <div class="lc-line"></div>
+                                <div class="lc-stage-name">Approval / Correction</div>
+                                <div class="lc-stage-time">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Compliance Review Snapshot ────────────────── -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Compliance Review Snapshot</div>
+                            <div class="card-sub">Responsible AI &nbsp;·&nbsp; Regulatory oversight &nbsp;·&nbsp;
+                                Adaptive learning from auditor decisions</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="chip active">Awaiting Review</button>
+                            <button class="chip">Decision History</button>
+                            <a href="#" class="view-all" style="margin-left:0.25rem;">All cases</a>
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            style="display:grid;grid-template-columns:auto 1fr auto auto auto;gap:0.75rem;padding:0.6rem 1.5rem;border-bottom:1px solid var(--border);">
+                            <span></span>
+                            <span
+                                style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;">Claim
+                                / Reason</span>
+                            <span
+                                style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;text-align:center;">AI
+                                Confidence</span>
+                            <span
+                                style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;text-align:center;">Reviewer</span>
+                            <span
+                                style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);opacity:0.6;text-align:center;">Action</span>
+                        </div>
+                        <div class="review-list">
+                            <div class="review-row">
+                                <div class="rev-status pending"></div>
+                                <div class="rev-info">
+                                    <div class="claim">CLM-7743</div>
+                                    <div class="desc">Policy mismatch — CPT 96413 vs BCBS-IL benefit schedule · Oncology
+                                    </div>
+                                </div>
+                                <div class="rev-conf">
+                                    <div class="rev-conf-val">62%</div>
+                                    <div class="rev-conf-label">Risk Index</div>
+                                </div>
+                                <div style="font-size:0.75rem;color:var(--text-secondary);">Unassigned</div>
+                                <button class="rev-action"
+                                    onclick="showToast('CLM-7743 assigned to compliance queue.')">Assign</button>
+                            </div>
+                            <div class="review-row">
+                                <div class="rev-status pending"></div>
+                                <div class="rev-info">
+                                    <div class="claim">CLM-7769</div>
+                                    <div class="desc">Annual cap exceeded by ₹85,000 — prior auth amendment required ·
+                                        Surgery</div>
+                                </div>
+                                <div class="rev-conf">
+                                    <div class="rev-conf-val">83%</div>
+                                    <div class="rev-conf-label">Risk Index</div>
+                                </div>
+                                <div style="font-size:0.75rem;color:var(--text-secondary);">Unassigned</div>
+                                <button class="rev-action"
+                                    onclick="showToast('CLM-7769 escalated to senior review.')">Escalate</button>
+                            </div>
+                            <div class="review-row">
+                                <div class="rev-status review"></div>
+                                <div class="rev-info">
+                                    <div class="claim">CLM-7791</div>
+                                    <div class="desc">Duplicate CPT 90935 — merging with CLM-7783 · Nephrology</div>
+                                </div>
+                                <div class="rev-conf">
+                                    <div class="rev-conf-val">71%</div>
+                                    <div class="rev-conf-label">Risk Index</div>
+                                </div>
+                                <div style="font-size:0.75rem;color:var(--text-secondary);">R. Sharma</div>
+                                <button class="rev-action"
+                                    onclick="showToast('CLM-7791 cleared — forwarded to payer queue.')">Clear
+                                    Claim</button>
+                            </div>
+                            <div class="review-row">
+                                <div class="rev-status review"></div>
+                                <div class="rev-info">
+                                    <div class="claim">CLM-7751</div>
+                                    <div class="desc">Missing prior auth reference — Star Health network · Cardiology
+                                    </div>
+                                </div>
+                                <div class="rev-conf">
+                                    <div class="rev-conf-val">54%</div>
+                                    <div class="rev-conf-label">Risk Index</div>
+                                </div>
+                                <div style="font-size:0.75rem;color:var(--text-secondary);">P. Mehta</div>
+                                <button class="rev-action"
+                                    onclick="showToast('CLM-7751 hold applied — awaiting auth ref.')">Hold</button>
+                            </div>
+                            <div class="review-row">
+                                <div class="rev-status cleared"></div>
+                                <div class="rev-info">
+                                    <div class="claim">CLM-7762</div>
+                                    <div class="desc">Coverage validated — CT abdomen cleared for submission · Radiology
+                                    </div>
+                                </div>
+                                <div class="rev-conf">
+                                    <div class="rev-conf-val">12%</div>
+                                    <div class="rev-conf-label">Risk Index</div>
+                                </div>
+                                <div style="font-size:0.75rem;color:#15803d;font-weight:700;">Cleared</div>
+                                <button class="rev-action" style="opacity:0.4;cursor:default;">Submitted</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /content -->
+
+            <!-- ── Footer ─────────────────────────────────────── -->
+            <div class="dash-footer">
+                <span class="footer-meta">&copy; 2026 CareVerify AI, Inc. &nbsp;·&nbsp; Audit-Grade Platform
+                    &nbsp;·&nbsp; All data encrypted in transit and at rest</span>
+                <div class="footer-tags">
+                    <span class="footer-tag">HIPAA Compliant</span>
+                    <span class="footer-tag">Multi-Hospital Scalable</span>
+                    <span class="footer-tag">API-Ready Architecture</span>
+                    <span class="footer-tag">Audit-Ready Logging</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        style="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:#000;color:#fff;padding:0.75rem 1.75rem;border-radius:99px;font-size:0.85rem;font-weight:600;font-family:'Nunito Sans',sans-serif;opacity:0;transition:opacity 0.3s,transform 0.3s;pointer-events:none;z-index:999;white-space:nowrap;">
+    </div>
+
+    <script>
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.opacity = '1';
+            t.style.transform = 'translateX(-50%) translateY(0)';
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateX(-50%) translateY(20px)';
+            }, 2800);
+        }
+
+        // Focus Mode toggle
+        function toggleFocusMode(el) {
+            el.classList.toggle('on');
+            document.body.classList.toggle('focus-mode');
+            const isOn = el.classList.contains('on');
+            showToast(isOn ? 'Focus Mode ON — showing critical claims only.' : 'Focus Mode OFF — all claims visible.');
+        }
+
+        // Claim table risk filter
+        function filterTable(risk, btn) {
+            btn.closest('.card-actions').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('#claim-tbody tr').forEach(row => {
+                if (risk === 'all') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = row.dataset.risk === risk ? '' : 'none';
+                }
+            });
+        }
+
+        // Chip filter interaction
+        document.querySelectorAll('.card-actions .chip:not([onclick])').forEach(chip => {
+            chip.addEventListener('click', function () {
+                this.closest('.card-actions').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Lifecycle claim selector
+        const lifecycleData = {
+            'CLM-7743': [true, true, true, 'active', false, false],
+            'CLM-7751': [true, true, 'active', false, false, false],
+            'CLM-7769': [true, true, true, 'active', false, false],
+            'CLM-7774': [true, true, true, true, true, 'active'],
+            'CLM-7791': [true, 'active', false, false, false, false],
+        };
+
+        function selectClaim(btn, id) {
+            document.querySelectorAll('.lc-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const stages = document.querySelectorAll('.lc-stage');
+            const data = lifecycleData[id] || [true, false, false, false, false, false];
+            stages.forEach((stage, i) => {
+                stage.classList.remove('done', 'active');
+                if (data[i] === true) stage.classList.add('done');
+                else if (data[i] === 'active') stage.classList.add('active');
+            });
+            showToast('Lifecycle loaded: ' + id);
+        }
+
+        // Compliance review tab switching
+        document.querySelectorAll('.card-actions .chip').forEach(chip => {
+            chip.addEventListener('click', function () {
+                const siblings = this.closest('.card-actions').querySelectorAll('.chip');
+                siblings.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+
+</html>

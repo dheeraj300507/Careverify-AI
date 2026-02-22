@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>CareVerify AI — Compliance Review Queue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg-color: #fcfdfd;
+            --card-bg: #ffffff;
+            --bg-green-soft: rgba(5, 150, 105, 0.04);
+            --text-primary: #059669;
+            --text-secondary: #5c716e;
+            --btn-primary: #171717;
+            --btn-primary-text: #ffffff;
+            --green-light: #5e8779;
+            --green-muted: #ecfdf5;
+            --green-border: rgba(5, 150, 105, 0.18);
+            --green-soft-shadow: rgba(5, 150, 105, 0.12);
+            --btn-radius: 12px;
+            --border-subtle: #f1f5f9;
+            --shadow-soft: 0 2px 8px rgba(5, 150, 105, 0.06);
+            --shadow-card: 0 20px 25px -5px rgba(5, 150, 105, 0.05);
+            --font-sans: 'Plus Jakarta Sans', 'Nunito Sans', sans-serif;
+
+            --sidebar-bg: #ffffff;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .dash-wrap {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar matches dashboard */
+        .sidebar {
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-subtle);
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #171717;
+            text-decoration: none;
+            margin-bottom: 1.75rem;
+            padding: 0 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-logo svg {
+            width: 24px;
+            height: 24px;
+            stroke: #171717;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .sidebar-section {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            padding: 0.5rem 0.75rem 0.35rem;
+            margin-top: 0.75rem;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.75rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: 0.15s;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item.active {
+            background: var(--green-muted);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .sidebar-badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 99px;
+        }
+
+        /* Topbar matches dashboard */
+        .topbar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .topbar-sub {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .sys-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #15803d;
+            background: rgba(34, 197, 94, 0.1);
+            padding: 0.3rem 0.75rem;
+            border-radius: 99px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Priority Summary */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--btn-radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--border-subtle);
+        }
+
+        .summary-card.critical::before {
+            background: var(--danger);
+        }
+
+        .summary-card.amber::before {
+            background: var(--warning);
+        }
+
+        .summary-card.green::before {
+            background: var(--success);
+        }
+
+        .summary-val {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .summary-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .summary-desc {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Focus Mode Toggle */
+        .focus-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 1rem;
+        }
+
+        .focus-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .focus-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .switch {
+            width: 36px;
+            height: 20px;
+            background: var(--border-subtle);
+            border-radius: 99px;
+            position: relative;
+            transition: 0.2s;
+        }
+
+        .switch::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .focus-toggle.active .switch {
+            background: var(--text-primary);
+        }
+
+        .focus-toggle.active .switch::after {
+            transform: translateX(16px);
+        }
+
+        /* Main Workspace Split */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        /* Queue List */
+        .queue-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.35rem 0.8rem;
+            border-radius: 99px;
+            border: 1px solid var(--border-subtle);
+            background: #fff;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+        }
+
+        .filter-btn.active {
+            background: var(--btn-primary);
+            color: #fff;
+            border-color: var(--btn-primary);
+        }
+
+        .claim-card {
+            background: #fff;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--btn-radius);
+            padding: 1rem 1.25rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1.25rem;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .claim-card:hover {
+            border-color: var(--green-border);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .claim-card.selected {
+            border-width: 2px;
+            border-color: var(--text-primary);
+        }
+
+        .claim-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot-red {
+            background: var(--danger);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .dot-amber {
+            background: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .dot-green {
+            background: var(--success);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .claim-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .claim-id {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-family: monospace;
+        }
+
+        .claim-dept {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.03);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .claim-issue {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .claim-stats {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            align-items: flex-end;
+        }
+
+        .impact {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .conf-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: var(--green-muted);
+            color: var(--text-primary);
+        }
+
+        /* Focus mode hiding */
+        .queue-panel.focus-active .claim-card:not(.high-risk) {
+            display: none;
+        }
+
+        /* Review Panel */
+        .review-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--btn-radius);
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 80px;
+        }
+
+        .panel-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .collab-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .collab-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--green-light);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            font-weight: 800;
+        }
+
+        .panel-content {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 220px);
+        }
+
+        .insight-box {
+            background: var(--green-muted);
+            border: 1px solid var(--green-border);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .insight-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .insight-text {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .finding-section h4 {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.3rem;
+        }
+
+        .ai-reason {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.02);
+            padding: 0.85rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--warning);
+        }
+
+        .ai-correction {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: #15803d;
+            font-weight: 600;
+            padding: 0.85rem;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 8px;
+            border: 1px dashed rgba(34, 197, 94, 0.3);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .tl-item {
+            display: flex;
+            gap: 0.75rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+
+        .tl-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 12px;
+            bottom: 0;
+            width: 1px;
+            background: var(--border-subtle);
+        }
+
+        .tl-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--border-subtle);
+            flex-shrink: 0;
+            margin-top: 3px;
+            position: relative;
+            z-index: 2;
+            border: 2px solid #fff;
+        }
+
+        .tl-dot.active {
+            background: var(--success);
+        }
+
+        .tl-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
+        .tl-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .tl-meta {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        .notes-area {
+            width: 100%;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 80px;
+            background: rgba(0, 0, 0, 0.01);
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .notes-area:focus {
+            border-color: var(--text-primary);
+            background: #fff;
+        }
+
+        .upload-area {
+            border: 1.5px dashed var(--border-subtle);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.01);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--text-primary);
+            background: rgba(5, 150, 105, 0.02);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .upload-icon {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .upload-hint {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .panel-actions {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-subtle);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.01);
+            border-radius: 0 0 var(--btn-radius) var(--btn-radius);
+        }
+
+        .btn {
+            padding: 0.7rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            border: none;
+            font-family: var(--font-sans);
+            transition: 0.2s;
+        }
+
+        .btn-approve {
+            background: var(--btn-primary);
+            color: #fff;
+            grid-column: span 2;
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-outline {
+            background: #fff;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        .btn-escalate {
+            background: rgba(239, 68, 68, 0.05);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-escalate:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        @media(max-width:1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dash-wrap">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a class="sidebar-logo" href="index .html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+                CareVerify
+            </a>
+            <span class="sidebar-section">Intelligence</span>
+            <a class="sidebar-item" href="insurance-dashboard.html">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+                Insurance Dashboard
+            </a>
+            <a class="sidebar-item active" href="review-queue.html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                </svg>
+                Claim Queue
+                <span class="sidebar-badge">4</span>
+            </a>
+            <a class="sidebar-item" href="risk-scoring.html">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                Risk Scoring
+            </a>
+
+            <span class="sidebar-section">Compliance</span>
+            <a class="sidebar-item" href="#">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                Compliance Review
+            </a>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <span class="topbar-title">Compliance Review Queue</span>
+                    <span class="topbar-sub">AI-flagged claims awaiting human validation before insurer
+                        submission.</span>
+                </div>
+                <div class="topbar-right">
+                    <div class="sys-indicator">
+                        <div class="pulse-dot"></div> AI Recommendations Active
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Smart Priority Summary -->
+                <div class="summary-grid">
+                    <div class="summary-card critical">
+                        <div class="summary-val">4</div>
+                        <div class="summary-label">High Risk Claims</div>
+                        <div class="summary-desc">Immediate action required</div>
+                    </div>
+                    <div class="summary-card green">
+                        <div class="summary-val">12</div>
+                        <div class="summary-label">Ready for Approval</div>
+                        <div class="summary-desc">Low risk, high confidence</div>
+                    </div>
+                    <div class="summary-card amber">
+                        <div class="summary-val">3</div>
+                        <div class="summary-label">Escalations Pending</div>
+                        <div class="summary-desc">Awaiting specialist review</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-val">1.4m</div>
+                        <div class="summary-label">Avg Review Time</div>
+                        <div class="summary-desc">-24% since AI enablement</div>
+                    </div>
+                </div>
+
+                <div class="focus-row">
+                    <div class="filters">
+                        <button class="filter-btn active">All Pending</button>
+                        <button class="filter-btn">Critical</button>
+                        <button class="filter-btn">To Clarify</button>
+                        <button class="filter-btn">Reviewed</button>
+                    </div>
+                    <div class="focus-toggle" id="focusToggle"
+                        onclick="document.getElementById('queueList').classList.toggle('focus-active'); this.classList.toggle('active')">
+                        <span class="focus-label">Focus Mode</span>
+                        <div class="switch"></div>
+                    </div>
+                </div>
+
+                <!-- Split Workspace -->
+                <div class="workspace">
+
+                    <!-- Left: Claim Queue -->
+                    <div class="queue-panel" id="queueList">
+                        <!-- Claim 1: Critical -->
+                        <div class="claim-card high-risk selected" onclick="selectClaim(this)">
+                            <div class="claim-dot dot-red"></div>
+                            <div class="claim-meta">
+                                <span class="claim-id">CLM-99214</span>
+                                <div>
+                                    <span class="claim-dept">Orthopedics</span>
+                                </div>
+                                <span class="claim-issue">Duplicate CPT Detected (27447)</span>
+                            </div>
+                            <div class="claim-stats">
+                                <span class="impact">$18,450.00</span>
+                                <span class="conf-badge">AI Conf: 98%</span>
+                            </div>
+                        </div>
+
+                        <!-- Claim 2: Amber -->
+                        <div class="claim-card high-risk" onclick="selectClaim(this)">
+                            <div class="claim-dot dot-amber"></div>
+                            <div class="claim-meta">
+                                <span class="claim-id">CLM-88305</span>
+                                <div>
+                                    <span class="claim-dept">Cardiology</span>
+                                </div>
+                                <span class="claim-issue">Missing Prior Authorization</span>
+                            </div>
+                            <div class="claim-stats">
+                                <span class="impact">$4,200.00</span>
+                                <span class="conf-badge">AI Conf: 85%</span>
+                            </div>
+                        </div>
+
+                        <!-- Claim 3: Green -->
+                        <div class="claim-card" onclick="selectClaim(this)">
+                            <div class="claim-dot dot-green"></div>
+                            <div class="claim-meta">
+                                <span class="claim-id">CLM-77098</span>
+                                <div>
+                                    <span class="claim-dept">Radiology</span>
+                                </div>
+                                <span class="claim-issue">Minor Policy Standard Match</span>
+                            </div>
+                            <div class="claim-stats">
+                                <span class="impact">$850.00</span>
+                                <span class="conf-badge">AI Conf: 99%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Review Panel -->
+                    <div class="review-panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Active Review: CLM-99214</span>
+                            <div class="collab-indicator" title="Assigned to Admin User">
+                                <div class="collab-avatar">A</div>
+                                Admin
+                            </div>
+                        </div>
+
+                        <div class="panel-content">
+                            <!-- Insight Box -->
+                            <div class="insight-box">
+                                <div class="insight-label">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                    </svg>
+                                    AI Insight
+                                </div>
+                                <div class="insight-text">Recommended Action: Request Correction. In 94% of similar
+                                    orthopedics cases, duplicate 27447 was a charting error.</div>
+                            </div>
+
+                            <!-- Findings -->
+                            <div class="finding-section">
+                                <h4>Explainable AI Reasoning</h4>
+                                <div class="ai-reason">
+                                    The engine detected CPT 27447 (Arthroplasty, knee) billed twice for the same service
+                                    date (Oct 12) under provider Dr. Smith. Payer policy typically only allows one
+                                    occurrence per knee.
+                                </div>
+                                <div class="ai-correction">
+                                    <strong>Suggested Correction:</strong> Remove the duplicate line item or apply RT/LT
+                                    modifiers if bilateral.
+                                </div>
+                            </div>
+
+                            <!-- Timeline -->
+                            <div class="finding-section" style="margin-top:0.5rem">
+                                <h4>Decision History</h4>
+                                <div class="timeline">
+                                    <div class="tl-item">
+                                        <div class="tl-dot"></div>
+                                        <div class="tl-content">
+                                            <span class="tl-title">Claim Generated</span>
+                                            <span class="tl-meta">Oct 14, 08:30 AM · System</span>
+                                        </div>
+                                    </div>
+                                    <div class="tl-item">
+                                        <div class="tl-dot"></div>
+                                        <div class="tl-content">
+                                            <span class="tl-title">AI Engine Flagged Violation</span>
+                                            <span class="tl-meta">Oct 14, 08:32 AM · CareVerify Engine</span>
+                                        </div>
+                                    </div>
+                                    <div class="tl-item">
+                                        <div class="tl-dot active"></div>
+                                        <div class="tl-content">
+                                            <span class="tl-title" style="color:#15803d">Awaiting Review</span>
+                                            <span class="tl-meta">Currently viewing</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="finding-section">
+                                <h4>Reviewer Notes</h4>
+                                <textarea class="notes-area" placeholder="Add compliance notes here..."></textarea>
+                            </div>
+
+                            <!-- Document Upload -->
+                            <div class="finding-section">
+                                <h4>AI Document Analysis</h4>
+                                <div class="upload-area" id="uploadArea"
+                                    onclick="document.getElementById('doc-upload').click()">
+                                    <input type="file" id="doc-upload" hidden accept=".pdf,.jpeg,.jpg,.png"
+                                        onchange="handleFileUpload(this.files[0])">
+                                    <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <div class="upload-text" id="uploadText">Upload Medical Records</div>
+                                    <div class="upload-hint" id="uploadHint">Drag & drop or browse (PDF, Images) for AI
+                                        cross-validation
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="panel-actions">
+                            <button class="btn btn-approve">Approve & Submit Anyway</button>
+                            <button class="btn btn-outline">Hold for Review</button>
+                            <button class="btn btn-escalate">Request Correction</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        style="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:#000;color:#fff;padding:0.75rem 1.75rem;border-radius:99px;font-size:0.85rem;font-weight:600;font-family:'Nunito Sans',sans-serif;opacity:0;transition:opacity 0.3s,transform 0.3s;pointer-events:none;z-index:999;white-space:nowrap;">
+    </div>
+
+    <script>
+        // STEP 1 — SELECT CLAIM
+        function selectClaim(el) {
+            document.querySelectorAll('.claim-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        // STEP 2 — TOAST NOTIFICATIONS
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            if (!t) return;
+            t.textContent = msg;
+            t.style.opacity = '1';
+            t.style.transform = 'translateX(-50%) translateY(0)';
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateX(-50%) translateY(20px)';
+            }, 2800);
+        }
+
+        // STEP 3 — DRAG & DROP LOGIC
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadText = document.getElementById('uploadText');
+        const uploadHint = document.getElementById('uploadHint');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.style.borderColor = 'var(--text-primary)';
+                uploadArea.style.background = 'rgba(5, 150, 105, 0.05)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.style.borderColor = 'var(--border-subtle)';
+                uploadArea.style.background = 'rgba(0, 0, 0, 0.01)';
+            }, false);
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            handleFileUpload(file);
+        }, false);
+
+        // STEP 4 — FILE UPLOAD & AI SIMULATION
+        async function handleFileUpload(file) {
+            if (!file) return;
+
+            // Validate file extension
+            const allowed = ['pdf', 'png', 'jpg', 'jpeg'];
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!allowed.includes(ext)) {
+                showToast("Error: File type not supported.");
+                return;
+            }
+
+            // Set loading state
+            const originalText = uploadText.textContent;
+            const originalHint = uploadHint.textContent;
+            uploadText.textContent = "AI Processing...";
+            uploadHint.textContent = `Analyzing ${file.name}...`;
+            uploadArea.style.pointerEvents = 'none';
+            uploadArea.style.opacity = '0.6';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/upload-medical-record', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error(`Server returned ${response.status}`);
+                const data = await response.json();
+
+                console.log("AI Result:", data);
+                showToast(`Success: ${data.analysis}`);
+
+            } catch (err) {
+                console.error("Upload failed:", err);
+                showToast("Connection Error: Backend unavailable.");
+            } finally {
+                // Reset UI
+                uploadText.textContent = originalText;
+                uploadHint.textContent = originalHint;
+                uploadArea.style.pointerEvents = 'auto';
+                uploadArea.style.opacity = '1';
+                document.getElementById('doc-upload').value = ''; // Clear input
+            }
+        }
+    </script>
+</body>
+
+</html>

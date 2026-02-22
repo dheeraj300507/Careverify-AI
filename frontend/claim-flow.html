@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareVerify — Claim Intelligence Flow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* CareVerify Strict Design System */
+            --bg-color: #fcfdfd;
+            --card-bg: #ffffff;
+            --bg-green-soft: rgba(5, 150, 105, 0.04);
+
+            --text-primary: #059669;
+            --text-secondary: #5c716e;
+
+            --btn-primary: #171717;
+            --btn-primary-text: #ffffff;
+
+            --green-light: #5e8779;
+            --green-muted: #ecfdf5;
+            --green-border: rgba(5, 150, 105, 0.18);
+            --green-soft-shadow: rgba(5, 150, 105, 0.12);
+
+            --btn-radius: 12px;
+
+            --border-subtle: #f1f5f9;
+            --shadow-soft: 0 2px 8px rgba(5, 150, 105, 0.06);
+            --shadow-card: 0 20px 25px -5px rgba(5, 150, 105, 0.05);
+
+            --font-sans: 'Plus Jakarta Sans', 'Nunito Sans', sans-serif;
+        }
+
+        /* ── Reset & Base ── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ── Typography ── */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--text-primary);
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ── Navbar ── */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 5%;
+            background: rgba(252, 253, 253, 0.9);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-logo svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-primary);
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--btn-primary);
+            color: var(--btn-primary-text);
+            padding: 0.875rem 1.75rem;
+            border-radius: var(--btn-radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ── Hero Section ── */
+        .hero {
+            text-align: center;
+            padding: 6rem 1.5rem;
+            background: var(--bg-green-soft);
+            border-bottom: 1px solid var(--border-subtle);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -10%;
+            width: 50%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(5, 150, 105, 0.03) 0%, transparent 70%);
+            transform: rotate(-15deg);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            max-width: 900px;
+            margin-inline: auto;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto 2.5rem auto;
+            line-height: 1.7;
+        }
+
+        /* ── Main Layout (Flow & Panel) ── */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 5rem 1.5rem;
+        }
+
+        .flow-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        /* ── Interactive Claim Flow Timeline ── */
+        .timeline {
+            position: relative;
+            padding-left: 2.5rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 2rem;
+            bottom: 2rem;
+            width: 2px;
+            background: var(--green-border);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .timeline-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .timeline-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .timeline-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .timeline-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .timeline-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .timeline-item:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        .timeline-item:nth-child(7) {
+            animation-delay: 0.7s;
+        }
+
+        .timeline-item:nth-child(8) {
+            animation-delay: 0.8s;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2.35rem;
+            top: 1.25rem;
+            width: 14px;
+            height: 14px;
+            background: var(--card-bg);
+            border: 3px solid var(--text-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px var(--bg-color);
+            z-index: 2;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            background: var(--text-primary);
+            box-shadow: 0 0 0 6px var(--green-soft-shadow);
+        }
+
+        .flow-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flow-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card);
+            border-color: var(--green-border);
+        }
+
+        .flow-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--text-primary);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .flow-card:hover::after {
+            opacity: 1;
+        }
+
+        .fc-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .fc-icon-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .fc-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-green-soft);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+        }
+
+        .fc-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .fc-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .fc-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--green-muted);
+            color: var(--text-primary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 99px;
+        }
+
+        .fc-content {
+            margin-top: 0.5rem;
+            padding-left: 3.5rem;
+        }
+
+        .fc-content p {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.5;
+        }
+
+        /* ── Live Intelligence Panel ── */
+        .panel-wrapper {
+            position: sticky;
+            top: 6rem;
+        }
+
+        .intell-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--text-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(5, 150, 105, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+            }
+        }
+
+        .panel-header h3 {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .metric-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .m-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .m-val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--btn-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .m-val.highlight {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            line-height: 1;
+            margin-bottom: 0.75rem;
+        }
+
+        .m-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--border-subtle);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .m-bar-fill {
+            height: 100%;
+            background: var(--text-primary);
+            width: 98.4%;
+            border-radius: 99px;
+            position: relative;
+        }
+
+        .m-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2.5s infinite;
+        }
+
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .badge-risk {
+            background: var(--green-muted);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--green-border);
+            font-weight: 700;
+        }
+
+        .status-steps {
+            display: flex;
+            gap: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .step-tick {
+            flex: 1;
+            height: 4px;
+            background: var(--green-muted);
+            border-radius: 2px;
+        }
+
+        .step-tick.active {
+            background: var(--text-primary);
+        }
+
+        /* ── Innovation Highlights Strip ── */
+        .innovation-strip {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 5rem 1.5rem;
+        }
+
+        .inov-grid {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .inov-card {
+            padding: 1rem;
+        }
+
+        .inov-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-green-soft);
+            border: 1px solid var(--green-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .inov-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .inov-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .inov-card p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* ── Why This Matters Section ── */
+        .why-matters {
+            padding: 6rem 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .why-matters h2 {
+            font-size: 2.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .why-subtitle {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 4rem auto;
+        }
+
+        .comp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            text-align: left;
+        }
+
+        .comp-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .comp-card.predictive {
+            border-color: var(--green-border);
+            box-shadow: var(--shadow-card);
+            background: linear-gradient(to bottom right, #ffffff, var(--bg-green-soft));
+        }
+
+        .comp-header {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .predictive .comp-header {
+            color: var(--text-primary);
+        }
+
+        .comp-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .comp-list {
+            list-style: none;
+        }
+
+        .comp-list li {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .comp-list li::before {
+            content: '×';
+            position: absolute;
+            left: 0;
+            top: -2px;
+            color: #ef4444;
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .predictive .comp-list li::before {
+            content: '✓';
+            color: var(--text-primary);
+            font-size: 1rem;
+            top: 2px;
+        }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            background: var(--card-bg);
+        }
+
+        .footer-logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .flow-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-wrapper {
+                position: static;
+                order: -1;
+            }
+
+            .comp-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <a style="color:#171717" href="index .html" class="nav-logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+            CareVerify
+        </a>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="claim-flow.html" style="color: var(--text-primary);">Intelligence Flow</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>CareVerify Claim Intelligence Flow</h1>
+        <p>From bill upload to verified insurance approval — powered by AI-driven validation and predictive risk
+            analysis.</p>
+        <button class="btn-primary">
+            Simulate Claim Processing
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+        </button>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container flow-layout">
+
+        <!-- Left: Interactive Claim Flow Timeline -->
+        <div class="timeline">
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                                </svg></div>
+                            <h3 class="fc-title">Bill Upload</h3>
+                        </div>
+                        <span class="fc-label">Ingestion</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>Upload PDF/Image hospital bill.</p>
+                        <p>Multi-format ingestion.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <path d="M4 7V4h16v3M9 20h6M12 4v16" />
+                                </svg></div>
+                            <h3 class="fc-title">OCR Extraction</h3>
+                        </div>
+                        <span class="fc-label">AI</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>Text recognition from scanned documents.</p>
+                        <p>Medical entity detection.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                                    <polyline points="2 17 12 22 22 17" />
+                                    <polyline points="2 12 12 17 22 12" />
+                                </svg></div>
+                            <h3 class="fc-title">Data Structuring</h3>
+                        </div>
+                        <span class="fc-label">Processing</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>CPT / ICD mapping.</p>
+                        <p>Structured claim dataset creation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <path d="M2 12h4l3-9 5 18 3-9h5" />
+                                </svg></div>
+                            <h3 class="fc-title">AI Risk Analysis</h3>
+                        </div>
+                        <span class="fc-label">Intelligence</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>Duplicate billing detection &amp; Cost anomaly analysis.</p>
+                        <p>Rejection probability prediction.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                    <polyline points="10 9 9 9 8 9" />
+                                </svg></div>
+                            <h3 class="fc-title">Policy Validation</h3>
+                        </div>
+                        <span class="fc-label">Validation</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>Coverage eligibility verification.</p>
+                        <p>Deductible &amp; policy cap matching.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="8" x2="12" y2="12" />
+                                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                                </svg></div>
+                            <h3 class="fc-title">Fraud &amp; Anomaly Detection</h3>
+                        </div>
+                        <span class="fc-label">Security</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>Department risk benchmarking.</p>
+                        <p>Pattern deviation analysis.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="9" y1="3" x2="9" y2="21" />
+                                </svg></div>
+                            <h3 class="fc-title">Compliance Review</h3>
+                        </div>
+                        <span class="fc-label">Audit</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>Human-in-the-loop validation.</p>
+                        <p>Explainable AI reasoning.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="flow-card">
+                    <div class="fc-header">
+                        <div class="fc-icon-wrapper">
+                            <div class="fc-icon"><svg viewBox="0 0 24 24">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg></div>
+                            <h3 class="fc-title">Optimized Claim Submission</h3>
+                        </div>
+                        <span class="fc-label">Output</span>
+                    </div>
+                    <div class="fc-content">
+                        <p>Clean claim sent to insurer.</p>
+                        <p>Reduced rejection probability.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: Live Intelligence Panel -->
+        <div class="panel-wrapper">
+            <div class="intell-panel">
+                <div class="panel-header">
+                    <div class="pulse-dot"></div>
+                    <h3>Live Claim Processing Status</h3>
+                </div>
+
+                <div class="metric-group">
+                    <span class="m-label">Simulated Stage</span>
+                    <div class="m-val">
+                        <span>AI Risk Analysis...</span>
+                    </div>
+                    <div class="status-steps">
+                        <div class="step-tick active"></div>
+                        <div class="step-tick active"></div>
+                        <div class="step-tick active"></div>
+                        <div class="step-tick active"></div>
+                        <div class="step-tick"></div>
+                        <div class="step-tick"></div>
+                        <div class="step-tick"></div>
+                        <div class="step-tick"></div>
+                    </div>
+                </div>
+
+                <div class="metric-group" style="margin-top: 2rem;">
+                    <span class="m-label">AI Confidence Score</span>
+                    <div class="m-val highlight">98.4%</div>
+                    <div class="m-bar-bg">
+                        <div class="m-bar-fill"></div>
+                    </div>
+                </div>
+
+                <div class="metric-group"
+                    style="margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+                    <span class="m-label">Risk Level</span>
+                    <div style="margin-top: 0.5rem;">
+                        <span class="badge-risk">Low Risk Detected</span>
+                    </div>
+                </div>
+
+                <div class="metric-group" style="margin-top: 1.5rem;">
+                    <span class="m-label">Est. Approval Probability</span>
+                    <div class="m-val" style="font-size: 1.5rem;">96%</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Innovation Highlights Strip -->
+    <section class="innovation-strip">
+        <div class="inov-grid">
+            <div class="inov-card">
+                <div class="inov-icon"><svg viewBox="0 0 24 24">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                        <line x1="12" y1="22.08" x2="12" y2="12" />
+                    </svg></div>
+                <h4>Predictive Forecasting</h4>
+                <p>Foresee and mitigate rejection probabilities instantly before data exits the system.</p>
+            </div>
+            <div class="inov-card">
+                <div class="inov-icon"><svg viewBox="0 0 24 24">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg></div>
+                <h4>Explainable Audits</h4>
+                <p>Transparent AI reasoning logs for maximum accountability and compliance.</p>
+            </div>
+            <div class="inov-card">
+                <div class="inov-icon"><svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg></div>
+                <h4>Real-Time Policy Intel</h4>
+                <p>Automated rules engine syncing with updated payer policies seamlessly.</p>
+            </div>
+            <div class="inov-card">
+                <div class="inov-icon"><svg viewBox="0 0 24 24">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg></div>
+                <h4>Adaptive Learning</h4>
+                <p>Continuous model improvement matching new denial patterns and trends.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why This Matters Section -->
+    <section class="why-matters">
+        <h2>Why This Matters</h2>
+        <p class="why-subtitle">Traditional billing detects errors after rejection. CareVerify prevents errors before
+            submission.</p>
+
+        <div class="comp-grid">
+            <div class="comp-card">
+                <div class="comp-header">The Old Way</div>
+                <h3>Reactive Billing</h3>
+                <ul class="comp-list">
+                    <li>Send claims blindly</li>
+                    <li>Wait 30+ days for response</li>
+                    <li>Manual rework of denials</li>
+                    <li>High labor costs and delayed cash flow</li>
+                </ul>
+            </div>
+            <div class="comp-card predictive">
+                <div class="comp-header">CareVerify Way</div>
+                <h3>Predictive Billing Intelligence</h3>
+                <ul class="comp-list">
+                    <li>AI verifies claims instantly</li>
+                    <li>Denial risks flagged pre-submission</li>
+                    <li>Continuous policy synchronization</li>
+                    <li>Accelerated and protected cash flow</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">CareVerify</div>
+        <div class="footer-text">© 2026 CareVerify. All rights reserved. Enterprise Healthcare AI.</div>
+    </footer>
+
+</body>
+
+</html>

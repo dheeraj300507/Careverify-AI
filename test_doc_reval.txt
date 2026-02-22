@@ -1,0 +1,5 @@
+Patient Record: John Doe
+Diagnosis: Osteoarthritis (M17.11)
+Date: 2026-02-22
+Procedure: Total Knee Arthroplasty (27447) requested.
+Notes: Surgery indicated due to persistent pain. Pre-authorized by insurer.

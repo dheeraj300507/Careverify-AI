@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareVerify AI – Hospital Billing Audit & Insurance Intelligence</title>
+  <meta name="description"
+    content="CareVerify AI is an AI-powered hospital billing audit platform that validates insurance coverage, detects claim anomalies, and reduces financial risk before claims are processed." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;0,6..12,900;1,6..12,300;1,6..12,400&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────── */
+    :root {
+
+      /* Backgrounds */
+      --bg-color: #fcfdfd;
+      --card-bg: #ffffff;
+      --bg-green-soft: rgba(5, 150, 105, 0.04);
+      /* subtle green wash */
+
+      /* Typography */
+      --text-primary: #059669;
+      --text-secondary: #5c716e;
+
+      /* Primary Brand Green */
+      --btn-primary: #171717;
+      --btn-primary-text: #ffffff;
+
+      /* Added Green Variants (Derived from same color) */
+      --green-light: #5e8779;
+      /* hover / highlights */
+      --green-muted: #ecfdf5;
+      /* card backgrounds */
+      --green-border: rgba(5, 150, 105, 0.18);
+      --green-soft-shadow: rgba(5, 150, 105, 0.12);
+
+      /* Buttons & Actions */
+      --btn-radius: 12px;
+
+      /* Borders & Shadows */
+      --border-subtle: #f1f5f9;
+      --shadow-soft: 0 2px 8px rgba(5, 150, 105, 0.06);
+      --shadow-card: 0 20px 25px -5px rgba(5, 150, 105, 0.05);
+
+      /* Fonts */
+      --font-sans: 'Plus Jakarta Sans', 'Nunito Sans', sans-serif;
+    }
+
+
+    /* ─── Reset ─────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Sticky Header ─────────────────────────────────── */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(245, 250, 251, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: box-shadow 0.3s ease;
+    }
+
+    header.scrolled {
+      box-shadow: var(--shadow-soft);
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--text-primary);
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-center {
+      display: flex;
+      gap: 0;
+      list-style: none;
+      margin-left: auto;
+      margin-right: 1.5rem;
+    }
+
+    .nav-center a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-center a:hover {
+      color: var(--text-primary);
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .nav-center a.active {
+      color: var(--text-primary);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1.5px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .nav-bell {
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-bell svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-secondary);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.2s;
+    }
+
+    .nav-bell:hover svg {
+      stroke: var(--text-primary);
+    }
+
+    .nav-bell-badge {
+      position: absolute;
+      top: -4px;
+      right: -5px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.55rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-color);
+      line-height: 1;
+    }
+
+    .nav-profile-wrap {
+      position: relative;
+    }
+
+    .nav-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      cursor: pointer;
+      border: 1.5px solid var(--border-subtle);
+      transition: border-color 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-avatar:hover {
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 0.5rem 0;
+      min-width: 160px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+      z-index: 200;
+    }
+
+    .profile-dropdown.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .profile-dropdown a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 1rem;
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .profile-dropdown a:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text-primary);
+    }
+
+    .profile-dropdown svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .portal-dropdown-wrap {
+      position: relative;
+    }
+
+    .portal-toggle {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .portal-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px);
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 0.5rem 0;
+      min-width: 180px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+      z-index: 200;
+    }
+
+    .portal-dropdown.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .portal-dropdown a {
+      display: block;
+      padding: 0.6rem 1.25rem;
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: background 0.15s, color 0.15s;
+      text-align: left;
+    }
+
+    .portal-dropdown a:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text-primary);
+    }
+
+    /* ─── Shared Section Styles ─────────────────────────── */
+    section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7rem 2rem 5rem;
+      position: relative;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ─── Scroll Animations ─────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.75s cubic-bezier(.22, .84, .23, 1),
+        transform 0.75s cubic-bezier(.22, .84, .23, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .reveal-delay-2 {
+      transition-delay: 0.22s;
+    }
+
+    .reveal-delay-3 {
+      transition-delay: 0.34s;
+    }
+
+    .reveal-delay-4 {
+      transition-delay: 0.46s;
+    }
+
+    .reveal-delay-5 {
+      transition-delay: 0.58s;
+    }
+
+    /* ─── Section 1: Hero ───────────────────────────────── */
+    #hero {
+      text-align: center;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--btn-radius);
+      padding: 0.35rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 2.25rem;
+    }
+
+    .hero-eyebrow .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.5);
+      }
+    }
+
+    .hero-headline {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+      max-width: 560px;
+      margin: 0 auto 2.75rem;
+      line-height: 1.7;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: var(--btn-primary);
+      color: var(--btn-primary-text);
+      border-radius: var(--btn-radius);
+      padding: 0.9rem 2.25rem;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-text-link {
+      display: block;
+      margin-top: 1.25rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .hero-text-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 1px;
+      background: var(--text-primary);
+      transition: width 0.3s ease;
+    }
+
+    .hero-text-link:hover::after {
+      width: 100%;
+    }
+
+    .hero-text-link:hover {
+      color: var(--text-primary);
+    }
+
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0.5;
+    }
+
+    .scroll-arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 1.5px solid var(--text-secondary);
+      border-bottom: 1.5px solid var(--text-secondary);
+      transform: rotate(45deg);
+      animation: scroll-bounce 1.6s ease-in-out infinite;
+    }
+
+    @keyframes scroll-bounce {
+
+      0%,
+      100% {
+        transform: rotate(45deg) translateY(0);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: rotate(45deg) translateY(5px);
+        opacity: 1;
+      }
+    }
+
+    /* ─── Section 2: Problem ────────────────────────────── */
+    #problem {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+      opacity: 0.6;
+    }
+
+    .section-headline {
+      font-size: clamp(1.9rem, 4.5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 4rem;
+      line-height: 1.7;
+    }
+
+    .problem-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+    }
+
+    .problem-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 2rem 1.75rem;
+      box-shadow: var(--shadow-card);
+      text-align: left;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .problem-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.09);
+    }
+
+    .problem-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .problem-card-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--text-primary);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .icon-svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-primary);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    .face-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--text-secondary);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .problem-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .problem-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* ─── Section 3: AI Demo ────────────────────────────── */
+    #ai-demo {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .demo-wrapper {
+      width: 100%;
+      max-width: 880px;
+      margin: 0 auto 0;
+    }
+
+    .demo-window {
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      box-shadow: 0 8px 48px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      margin-top: 3rem;
+    }
+
+    .demo-titlebar {
+      background: rgba(0, 0, 0, 0.03);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dot-red,
+    .dot-yellow,
+    .dot-green {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .dot-red {
+      background: #ff5f57;
+    }
+
+    .dot-yellow {
+      background: #ffbd2e;
+    }
+
+    .dot-green {
+      background: #28c840;
+    }
+
+    .demo-titlebar-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-left: auto;
+      margin-right: auto;
+      letter-spacing: 0.02em;
+    }
+
+    .demo-content {
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* Classroom Frame */
+    .classroom-frame {
+      background: #f0f4f5;
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      aspect-ratio: 4/3;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .classroom-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 6px;
+      padding: 12px;
+      height: 100%;
+    }
+
+    .face-cell {
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 8px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .face-icon {
+      opacity: 0.4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Detection overlays */
+    .face-cell.detected::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border: 1.5px solid rgba(34, 197, 94, 0.7);
+      border-radius: 6px;
+      animation: detect-pulse 3s ease-in-out infinite;
+    }
+
+    .face-cell.flagged::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border: 1.5px solid rgba(234, 179, 8, 0.8);
+      border-radius: 6px;
+      animation: detect-pulse 3s ease-in-out infinite 0.5s;
+    }
+
+    @keyframes detect-pulse {
+
+      0%,
+      100% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .conf-chip {
+      position: absolute;
+      bottom: 3px;
+      right: 3px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      font-size: 0.55rem;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .frame-label {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    /* Stats panel */
+    .demo-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .pcs-card {
+      background: var(--bg-color);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .pcs-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .pcs-ring-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .pcs-ring {
+      width: 72px;
+      height: 72px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .pcs-ring svg {
+      transform: rotate(-90deg);
+      width: 72px;
+      height: 72px;
+    }
+
+    .pcs-ring circle.bg {
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.07);
+      stroke-width: 6;
+    }
+
+    .pcs-ring circle.fg {
+      fill: none;
+      stroke: #22c55e;
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 188;
+      stroke-dashoffset: 28;
+      transition: stroke-dashoffset 1.5s cubic-bezier(.22, .84, .23, 1);
+    }
+
+    .pcs-ring circle.fg.animate {
+      stroke-dashoffset: 28;
+    }
+
+    .pcs-value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .pcs-text h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .pcs-text p {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-color);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+    }
+
+    .status-badge {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-badge.green {
+      background: #22c55e;
+    }
+
+    .status-badge.yellow {
+      background: #eab308;
+    }
+
+    .status-badge.gray {
+      background: #aaa;
+    }
+
+    .status-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .status-score {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* ─── Section 4: Human in the Loop ─────────────────── */
+    #human-loop {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .flagged-card-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 3rem;
+    }
+
+    .flagged-card {
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 28px;
+      box-shadow: 0 12px 56px rgba(0, 0, 0, 0.08);
+      padding: 2.5rem 2.5rem 2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .flagged-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      border-radius: var(--btn-radius);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #a16207;
+      padding: 0.3rem 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .student-avatar {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e8ecef, #d4dae0);
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      border: 3px solid rgba(234, 179, 8, 0.3);
+    }
+
+    .student-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .student-id {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    .conf-meter {
+      margin: 0 auto 1.75rem;
+      max-width: 280px;
+    }
+
+    .conf-meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .conf-meter-label span:first-child {
+      color: var(--text-secondary);
+    }
+
+    .conf-meter-label span:last-child {
+      color: #a16207;
+    }
+
+    .conf-bar-bg {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.07);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .conf-bar-fg {
+      height: 100%;
+      width: 62%;
+      background: linear-gradient(90deg, #eab308, #f59e0b);
+      border-radius: 99px;
+      transition: width 1.2s cubic-bezier(.22, .84, .23, 1);
+    }
+
+    .flagged-note {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.75rem;
+      line-height: 1.6;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .btn-approve {
+      background: var(--btn-primary);
+      color: var(--btn-primary-text);
+      border: none;
+      border-radius: var(--btn-radius);
+      padding: 0.75rem 1.75rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      flex: 1;
+    }
+
+    .btn-approve:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-reject {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1.5px solid rgba(0, 0, 0, 0.15);
+      border-radius: var(--btn-radius);
+      padding: 0.75rem 1.75rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      flex: 1;
+    }
+
+    .btn-reject:hover {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Toast feedback */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--btn-primary);
+      color: var(--btn-primary-text);
+      padding: 0.75rem 1.75rem;
+      border-radius: var(--btn-radius);
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── Section 5: Impact ──────────────────────────────── */
+    #impact {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      margin: 3.5rem 0;
+    }
+
+    .metric-item {
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 1.75rem 1.5rem;
+      text-align: left;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .metric-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.07);
+    }
+
+    .metric-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.85rem;
+    }
+
+    .metric-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--text-primary);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .metric-item h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-item p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .final-cta {
+      text-align: center;
+      padding-top: 1rem;
+    }
+
+    .final-cta .btn-primary {
+      font-size: 1.1rem;
+      padding: 1rem 2.75rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .final-cta p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 5rem 2rem 2rem;
+      background: #fff;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 3rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .footer-brand h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .footer-col h4 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 1.15rem;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col li {
+      margin-bottom: 0.65rem;
+    }
+
+    .footer-col a {
+      text-decoration: none;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-newsletter p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .newsletter-form input {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--btn-radius);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      background: var(--bg-color);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .newsletter-form input:focus {
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .newsletter-form button {
+      padding: 0.65rem 1.25rem;
+      background: var(--btn-primary);
+      color: var(--btn-primary-text);
+      border: none;
+      border-radius: var(--btn-radius);
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .newsletter-form button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .footer-divider {
+      border: none;
+      border-top: 1px solid var(--border-subtle);
+      margin-bottom: 1.75rem;
+    }
+
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .footer-social a:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .footer-social svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-secondary);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .back-to-top {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-to-top:hover {
+      color: var(--text-primary);
+    }
+
+    .back-to-top svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 680px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 680px) {
+      .nav-links {
+        display: none;
+      }
+
+      .demo-content {
+        grid-template-columns: 1fr;
+      }
+
+      .classroom-frame {
+        aspect-ratio: 16/10;
+      }
+
+      section {
+        padding: 6rem 1.25rem 4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Header ────────────────────────────────────────────── -->
+  <header id="site-header">
+    <nav>
+      <a style="color:#171717" class="logo" href="index .html">
+        <svg viewBox="0 0 24 24">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+        CareVerify
+      </a>
+      <div class="nav-right" style="margin-left: auto;">
+        <a href="portals.html" class="btn-primary"
+          style="padding: 0.6rem 1.5rem; text-decoration: none; font-size: 0.85rem;">Login</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ── Section 1: Hero ───────────────────────────────────── -->
+  <section id="hero">
+    <div class="container" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+      <div class="hero-eyebrow reveal">
+        <span class="dot"></span>
+        Healthcare Billing Intelligence · Compliance-First Architecture
+      </div>
+      <h1 style="font-size:3.9em" class="hero-headline reveal reveal-delay-1">
+        Intelligent Billing Oversight for Modern Hospitals
+      </h1>
+      <p class="hero-sub reveal reveal-delay-2">
+        CareVerify AI automatically analyzes hospital bills, validates insurance coverage, detects anomalies, and
+        reduces
+        financial risk before claims are processed.
+      </p>
+      <div class="reveal reveal-delay-3">
+        <a href="#ai-demo" class="hero-text-link">View Live Intelligence ↓</a>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      Scroll
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ── Section 2: Problem ────────────────────────────────── -->
+  <section id="problem">
+    <div class="container">
+      <p class="section-label reveal">The Systemic Problem</p>
+      <h2 class="section-headline reveal reveal-delay-1">
+        Revenue Leakage in Hospital<br />Billing Is Systemic.
+      </h2>
+      <p class="section-sub reveal reveal-delay-2">
+        Hospitals forfeit millions annually to billing errors, insurance disputes, and undetected fraud signals — all
+        preventable with the right intelligence layer.
+      </p>
+      <div class="problem-cards">
+        <div class="problem-card reveal reveal-delay-1">
+          <div class="problem-card-icon"><svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg></div>
+          <h3>Insurance Verification Delays</h3>
+          <p>Manual eligibility checks introduce processing lag, increasing denial rates and holding up revenue cycles
+            across multi-specialty units.</p>
+        </div>
+        <div class="problem-card reveal reveal-delay-2">
+          <div class="problem-card-icon"><svg viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg></div>
+          <h3>Duplicate Procedure Billing</h3>
+          <p>Inconsistent CPT code application across departments results in duplicate or contradictory billing entries
+            that expose hospitals to audit liability.</p>
+        </div>
+        <div class="problem-card reveal reveal-delay-3">
+          <div class="problem-card-icon"><svg viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg></div>
+          <h3>Policy Mismatch Disputes</h3>
+          <p>Claims submitted outside policy coverage windows or against misclassified procedure categories are
+            routinely rejected, eroding net revenue realization.</p>
+        </div>
+        <div class="problem-card reveal reveal-delay-4">
+          <div class="problem-card-icon"><svg viewBox="0 0 24 24">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            </svg></div>
+          <h3>Undetected Fraud Signals</h3>
+          <p>Without automated pattern analysis, upcoding, unbundling, and ghost billing patterns persist undetected
+            until external audits impose penalties and clawbacks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 3: Claim Intelligence Engine ────────────── -->
+  <section id="ai-demo">
+    <div class="container demo-wrapper">
+      <p class="section-label reveal">The Intelligence Engine</p>
+      <h2 class="section-headline reveal reveal-delay-1">Live Claim Intelligence Engine.</h2>
+      <p class="section-sub reveal reveal-delay-2">
+        The model evaluates CPT code consistency, policy coverage limits, and historical billing patterns in real time.
+        High-risk claims are automatically isolated for compliance review.
+      </p>
+      <div class="demo-window reveal reveal-delay-3">
+        <div class="demo-titlebar">
+          <div class="dot-red"></div>
+          <div class="dot-yellow"></div>
+          <div class="dot-green"></div>
+          <span class="demo-titlebar-label">CareVerify AI — Claim Processing Queue · Live</span>
+        </div>
+        <div class="demo-content">
+          <!-- Claim Grid -->
+          <div class="classroom-frame">
+            <div class="frame-label"><svg class="icon-svg" viewBox="0 0 24 24"
+                style="width:12px;height:12px;stroke:#fff;display:inline-block;vertical-align:middle;margin-right:4px;">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg> Ingestion Feed</div>
+            <div class="classroom-grid">
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">97%</span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">94%</span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">91%</span></div>
+              <div class="face-cell flagged"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">62%</span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">89%</span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">96%</span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">93%</span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">88%</span></div>
+              <div class="face-cell"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <rect x="3" y="10" width="18" height="11" rx="2" />
+                    <path d="M7 10V7" />
+                    <path d="M17 10V7" />
+                  </svg></span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">95%</span></div>
+              <div class="face-cell detected"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">90%</span></div>
+              <div class="face-cell flagged"><span class="face-icon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span><span class="conf-chip">58%</span></div>
+            </div>
+          </div>
+          <!-- Stats Panel -->
+          <div class="demo-stats">
+            <div class="pcs-card">
+              <p class="pcs-label">Claim Approval Probability (CAP)</p>
+              <div class="pcs-ring-wrap">
+                <div class="pcs-ring">
+                  <svg viewBox="0 0 72 72">
+                    <circle class="bg" cx="36" cy="36" r="30" />
+                    <circle class="fg" cx="36" cy="36" r="30" id="pcs-circle" />
+                  </svg>
+                  <div class="pcs-value">85%</div>
+                </div>
+                <div class="pcs-text">
+                  <h4>Batch Average</h4>
+                  <p>2 high-risk claims routed for compliance review. 10 cleared for processing.</p>
+                </div>
+              </div>
+            </div>
+            <div class="status-list">
+              <div class="status-row">
+                <div class="status-badge green"></div>
+                <span class="status-name">CLM-7741 · Cardiology</span>
+                <span class="status-score">97% · Cleared</span>
+              </div>
+              <div class="status-row">
+                <div class="status-badge green"></div>
+                <span class="status-name">CLM-7742 · Radiology</span>
+                <span class="status-score">94% · Cleared</span>
+              </div>
+              <div class="status-row">
+                <div class="status-badge yellow"></div>
+                <span class="status-name">CLM-7743 · Oncology</span>
+                <span class="status-score">62% · High Risk</span>
+              </div>
+              <div class="status-row">
+                <div class="status-badge green"></div>
+                <span class="status-name">CLM-7744 · Orthopedics</span>
+                <span class="status-score">93% · Cleared</span>
+              </div>
+              <div class="status-row">
+                <div class="status-badge yellow"></div>
+                <span class="status-name">CLM-7745 · Surgery</span>
+                <span class="status-score">58% · High Risk</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 4: Compliance Intelligence Layer ──────────── -->
+  <section id="human-loop">
+    <div class="container" style="display:flex;flex-direction:column;align-items:center;">
+      <p class="section-label reveal">Compliance Intelligence Layer</p>
+      <h2 class="section-headline reveal reveal-delay-1">Responsible AI. Human authority.</h2>
+      <p class="section-sub reveal reveal-delay-2" style="margin-bottom:0;">
+        AI flags high-risk claims. Compliance officers review edge cases. The system continuously learns from verified
+        corrections — maintaining a traceable audit trail at every decision point.
+      </p>
+      <div class="flagged-card-wrap reveal reveal-delay-3">
+        <div class="flagged-card">
+          <div class="flagged-badge">
+            <svg class="icon-svg" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#a16207;">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg> Routed for Compliance Review
+          </div>
+          <div class="student-avatar"><svg viewBox="0 0 24 24"
+              style="width:40px;height:40px;stroke:var(--text-secondary);fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg></div>
+          <p class="student-name">CLM-7743 · Oncology</p>
+          <p class="student-id">Policy: BCBS-IL-PPO · CPT 96413 — Coverage Validation Pending</p>
+          <div class="conf-meter">
+            <div class="conf-meter-label">
+              <span>Risk Index</span>
+              <span>62% — Elevated</span>
+            </div>
+            <div class="conf-bar-bg">
+              <div class="conf-bar-fg" id="conf-bar"></div>
+            </div>
+          </div>
+          <p class="flagged-note">
+            The model detected a policy coverage limit discrepancy against billed quantity. Risk index falls below the
+            auto-clearance threshold (75%). A compliance officer decision is required.
+          </p>
+          <div class="action-btns">
+            <button class="btn-approve" id="btn-approve" onclick="handleVerify('approve')">Clear Claim</button>
+            <button class="btn-reject" id="btn-reject" onclick="handleVerify('reject')">Escalate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 5: Platform Capabilities ─────────────────── -->
+  <section id="impact">
+    <div class="container">
+      <p class="section-label reveal">Why CareVerify AI</p>
+      <h2 class="section-headline reveal reveal-delay-1">Designed for multi-specialty hospital networks.</h2>
+      <p class="section-sub reveal reveal-delay-2">
+        Built for healthcare finance teams that require precision, scalability, and interoperability across insurance
+        systems and hospital workflows.
+      </p>
+      <div class="metrics-grid">
+        <div class="metric-item reveal reveal-delay-1">
+          <div class="metric-icon"><svg viewBox="0 0 24 24">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg></div>
+          <h4>Real-Time Claim Risk Scoring</h4>
+          <p>Every inbound claim is scored for approval probability within milliseconds — before it enters the payer
+            queue.</p>
+        </div>
+        <div class="metric-item reveal reveal-delay-2">
+          <div class="metric-icon"><svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" />
+            </svg></div>
+          <h4>Insurance Coverage Intelligence</h4>
+          <p>Automated policy validation against active coverage terms, benefit limits, and prior authorization
+            requirements — per payer, per plan.</p>
+        </div>
+        <div class="metric-item reveal reveal-delay-3">
+          <div class="metric-icon"><svg viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg></div>
+          <h4>Secure, Encrypted Architecture</h4>
+          <p>PHI-compliant data handling with end-to-end encryption. On-premise and private cloud deployment supported.
+            HIPAA-ready by design.</p>
+        </div>
+        <div class="metric-item reveal reveal-delay-4">
+          <div class="metric-icon"><svg viewBox="0 0 24 24">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg></div>
+          <h4>Audit-Grade Reporting</h4>
+          <p>Executive dashboards, denial trend analytics, and compliance exposure summaries — exportable and
+            regulator-ready.</p>
+        </div>
+        <div class="metric-item reveal reveal-delay-5">
+          <div class="metric-icon"><svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg></div>
+          <h4>Immutable Audit Trail</h4>
+          <p>Every model decision, compliance override, and claim state change is timestamped and permanently logged —
+            full chain of custody, always.</p>
+        </div>
+      </div>
+      <div class="final-cta reveal">
+
+        <p style="margin-top:1rem;">HIPAA-Compliant. &nbsp;Interoperable. &nbsp;Enterprise-Grade.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <!-- Brand -->
+        <div class="footer-brand">
+          <h3>CareVerify AI</h3>
+          <p>AI-powered hospital billing audit and insurance coverage intelligence. Built for healthcare finance teams
+            that require precision, compliance, and scalable oversight across hospital networks.</p>
+        </div>
+        <!-- Product -->
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="portals.html" onclick="localStorage.setItem('careverify_role', 'hospital')">Hospital Portal</a>
+            </li>
+            <li><a href="portals.html" onclick="localStorage.setItem('careverify_role', 'insurance')">Insurance
+                Portal</a></li>
+            <li><a href="#ai-demo">Claim Intelligence</a></li>
+            <li><a href="#human-loop">Compliance Layer</a></li>
+          </ul>
+        </div>
+        <!-- Company -->
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Research</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <!-- Newsletter -->
+        <div class="footer-col footer-newsletter">
+          <h4>Stay Informed</h4>
+          <p>Receive billing intelligence insights, compliance updates, and platform news — no marketing noise.</p>
+          <form class="newsletter-form" onsubmit="event.preventDefault();showToast('Subscription confirmed.');">
+            <input type="email" placeholder="you@hospital.org" required />
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <hr class="footer-divider" />
+      <div class="footer-bottom">
+        <span class="footer-copy">&copy; 2026 CareVerify AI, Inc. All rights reserved.</span>
+        <div class="footer-social">
+          <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24">
+              <path
+                d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.43.36a9.09 9.09 0 0 1-2.88 1.1A4.52 4.52 0 0 0 12 4.77v1A10.66 10.66 0 0 1 3 3.8s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+            </svg></a>
+          <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+              <rect x="2" y="9" width="4" height="12" />
+              <circle cx="4" cy="4" r="2" />
+            </svg></a>
+          <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24">
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+            </svg></a>
+          <a href="#" aria-label="Email"><svg viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg></a>
+        </div>
+        <a href="#hero" class="back-to-top"><svg viewBox="0 0 24 24">
+            <polyline points="18 15 12 9 6 15" />
+          </svg> Back to top</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Toast ──────────────────────────────────────────────── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── Scripts ────────────────────────────────────────────── -->
+  <script>
+    /* Header shadow on scroll */
+    const header = document.getElementById('site-header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* Profile & Portal dropdown toggles */
+    function toggleProfileMenu() {
+      document.getElementById('profile-dropdown').classList.toggle('open');
+      const portal = document.getElementById('portal-dropdown');
+      if (portal) portal.classList.remove('open');
+    }
+
+    function togglePortalMenu() {
+      document.getElementById('portal-dropdown').classList.toggle('open');
+      const profile = document.getElementById('profile-dropdown');
+      if (profile) profile.classList.remove('open');
+    }
+
+    document.addEventListener('click', (e) => {
+      const profileWrap = document.querySelector('.nav-profile-wrap');
+      const profileMenu = document.getElementById('profile-dropdown');
+      if (profileWrap && profileMenu && !profileWrap.contains(e.target)) {
+        profileMenu.classList.remove('open');
+      }
+
+      const portalWrap = document.querySelector('.portal-dropdown-wrap');
+      const portalMenu = document.getElementById('portal-dropdown');
+      if (portalWrap && portalMenu && !portalWrap.contains(e.target)) {
+        portalMenu.classList.remove('open');
+      }
+    });
+
+    /* Intersection Observer – reveal animations */
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    /* Hero elements visible immediately on load */
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#hero .reveal').forEach(el => {
+        setTimeout(() => el.classList.add('visible'), 100);
+      });
+    });
+
+    /* PCS ring animation on scroll into view */
+    const pcsSection = document.getElementById('ai-demo');
+    const pcsCircle = document.getElementById('pcs-circle');
+    let pcsAnimated = false;
+    const pcsObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !pcsAnimated) {
+        pcsAnimated = true;
+        // 85% of circumference 188 ≈ dashoffset 28 (pre-set) — animate from full to partial
+        pcsCircle.style.strokeDashoffset = '188';
+        void pcsCircle.offsetWidth; // reflow
+        setTimeout(() => {
+          pcsCircle.style.strokeDashoffset = '28';
+        }, 50);
+      }
+    }, { threshold: 0.3 });
+    pcsObserver.observe(pcsSection);
+
+    /* Confidence bar animation */
+    const confBarSection = document.getElementById('human-loop');
+    const confBar = document.getElementById('conf-bar');
+    let confAnimated = false;
+    const confObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !confAnimated) {
+        confAnimated = true;
+        confBar.style.width = '0';
+        void confBar.offsetWidth;
+        setTimeout(() => { confBar.style.width = '62%'; }, 80);
+      }
+    }, { threshold: 0.3 });
+    confObserver.observe(confBarSection);
+
+    /* Approve / Reject interaction */
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function handleVerify(action) {
+      const approveBtn = document.getElementById('btn-approve');
+      const rejectBtn = document.getElementById('btn-reject');
+      approveBtn.disabled = true;
+      rejectBtn.disabled = true;
+      approveBtn.style.opacity = '0.4';
+      rejectBtn.style.opacity = '0.4';
+
+      if (action === 'approve') {
+        approveBtn.style.opacity = '1';
+        approveBtn.disabled = false;
+        showToast('CLM-7743 cleared — forwarded to payer queue.');
+      } else {
+        rejectBtn.style.opacity = '1';
+        rejectBtn.disabled = false;
+        showToast('CLM-7743 escalated — compliance hold applied.');
+      }
+
+      setTimeout(() => {
+        approveBtn.disabled = false;
+        rejectBtn.disabled = false;
+        approveBtn.style.opacity = '1';
+        rejectBtn.style.opacity = '1';
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>

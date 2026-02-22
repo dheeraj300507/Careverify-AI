@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CareVerify | Portal Selection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* ─── Design Tokens ─────────────────────────────────── */
+            --bg-color: #fcfdfd;
+            --card-bg: #ffffff;
+            --bg-green-soft: rgba(5, 150, 105, 0.04);
+
+            --text-primary: #059669;
+            /* Brand Green */
+            --text-secondary: #5c716e;
+            --dark: #171717;
+
+            --green-border: rgba(5, 150, 105, 0.18);
+            --border-subtle: #f1f5f9;
+
+            --shadow-soft: 0 2px 8px rgba(5, 150, 105, 0.06);
+            --shadow-card: 0 20px 25px -5px rgba(5, 150, 105, 0.05);
+            --shadow-layered: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 40px rgba(5, 150, 105, 0.03);
+
+            --radius: 14px;
+            --font-sans: 'Plus Jakarta Sans', 'Inter', sans-serif;
+
+            /* Enhanced Background Tokens */
+            --green-soft-shadow: rgba(5, 150, 105, 0.08);
+        }
+
+        /* ─── Background Layers ────────────────────────── */
+        .page-background {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, var(--bg-green-soft) 0%, transparent 50%),
+                radial-gradient(at 100% 100%, var(--bg-green-soft) 0%, transparent 50%);
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 30%, var(--bg-green-soft) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, var(--bg-green-soft) 0%, transparent 40%);
+        }
+
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(var(--text-primary) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.15;
+            /* Increased visibility of dots */
+            mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+        }
+
+        .bg-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--green-soft-shadow) 0%, transparent 70%);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .bg-blur {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: rgba(5, 150, 105, 0.08);
+            filter: blur(140px);
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .blur-tl {
+            top: -200px;
+            left: -200px;
+        }
+
+        .blur-br {
+            bottom: -200px;
+            right: -200px;
+        }
+
+        /* ─── Global ────────────────────────────────────────── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: none;
+            /* Let page-background show */
+            color: var(--dark);
+            font-family: var(--font-sans);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* ─── Main Container ────────────────────────────────── */
+        .selection-container {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: var(--shadow-layered);
+            border: 1px solid var(--green-border);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            background-color: var(--bg-green-soft);
+            /* Subtle background tint */
+            background-image: radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.03) 0%, transparent 50%);
+            position: relative;
+            z-index: 1;
+            /* Stay above background */
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--text-primary);
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+            color: var(--dark);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* ─── Platform Context Panel ───────────────────────── */
+        .info-panel {
+            background: rgba(5, 150, 105, 0.08);
+            border: 1px solid var(--green-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 2.5rem;
+            text-align: left;
+        }
+
+        .info-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.4rem;
+        }
+
+        .info-text {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* ─── Portal Cards ──────────────────────────────────── */
+        .portal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .portal-card {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            text-align: left;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Left accent indicator */
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--text-primary);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--text-primary);
+            box-shadow: 0 10px 30px -10px rgba(5, 150, 105, 0.1);
+        }
+
+        .portal-card:hover::before {
+            opacity: 1;
+        }
+
+        .portal-card:active {
+            transform: translateY(-1px) scale(0.985);
+        }
+
+        .portal-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--bg-green-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.25rem;
+            transition: background 0.2s;
+        }
+
+        .portal-card:hover .portal-icon {
+            background: rgba(5, 150, 105, 0.1);
+        }
+
+        .portal-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--text-primary);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .portal-content {
+            flex: 1;
+        }
+
+        .portal-title {
+            display: block;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.15rem;
+            letter-spacing: -0.01em;
+        }
+
+        .portal-desc {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .chevron {
+            color: #cbd5e1;
+            transition: transform 0.2s, color 0.2s;
+            margin-left: 1rem;
+        }
+
+        .portal-card:hover .chevron {
+            color: var(--text-primary);
+            transform: translateX(3px);
+        }
+
+        /* ─── Trust Signal Strip ───────────────────────────── */
+        .trust-strip {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            opacity: 0.8;
+            letter-spacing: 0.02em;
+        }
+
+        .trust-item svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--text-primary);
+            stroke-width: 3;
+            fill: none;
+        }
+
+        /* ─── Footer ────────────────────────────────────────── */
+        .back-nav {
+            margin-top: 2.5rem;
+        }
+
+        .back-link {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-link:hover {
+            color: var(--dark);
+        }
+
+        /* Responsive Fixes */
+        @media (max-width: 500px) {
+            .selection-container {
+                padding: 2.5rem 1.5rem;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                background: var(--bg-color);
+            }
+
+            .trust-strip {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ── SaaS Background Layers ── -->
+    <div class="page-background">
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+        <div class="bg-blur blur-tl"></div>
+        <div class="bg-blur blur-br"></div>
+    </div>
+
+    <div class="selection-container">
+        <!-- Logo -->
+        <a style="color:#171717" href="index .html" class="logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+            CareVerify
+        </a>
+
+        <h1>Portal Gateway</h1>
+        <p class="subtitle">Secure access to the CareVerify mediation network.</p>
+
+        <!-- Platform Context Panel -->
+        <div class="info-panel">
+            <span class="info-label">CareVerify Network Access</span>
+            <p class="info-text">Each organization accesses an independent secure workspace within the CareVerify
+                mediation network.</p>
+        </div>
+
+        <!-- Portal Cards -->
+        <div class="portal-list">
+            <!-- Hospital -->
+            <div onclick="selectPortal('hospital')" class="portal-card">
+                <div class="portal-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m6 0v1a3 3 0 0 0 6 0V7M12 21V10m0 0a3 3 0 0 0 3-3V3.5h-6V7a3 3 0 0 0 3 3z" />
+                    </svg>
+                </div>
+                <div class="portal-content">
+                    <span class="portal-title">Hospital Portal</span>
+                    <span class="portal-desc">Submit and manage healthcare claims.</span>
+                </div>
+                <div class="chevron">
+                    <svg style="width:20px;height:20px;" viewBox="0 0 24 24">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Insurance -->
+            <div onclick="selectPortal('insurance')" class="portal-card">
+                <div class="portal-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <polyline points="9 12 11 14 15 10" />
+                    </svg>
+                </div>
+                <div class="portal-content">
+                    <span class="portal-title">Insurance Portal</span>
+                    <span class="portal-desc">Review verified claims and approvals.</span>
+                </div>
+                <div class="chevron">
+                    <svg style="width:20px;height:20px;" viewBox="0 0 24 24">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Trust Signal Strip -->
+        <div class="trust-strip">
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Secure Organization Access
+            </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Role-Based Isolation
+            </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                AI Verification Enabled
+            </div>
+        </div>
+
+        <!-- Back Nav -->
+        <div class="back-nav">
+            <a href="index .html" class="back-link">
+                <svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"
+                    viewBox="0 0 24 24">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Platform
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function selectPortal(role) {
+            localStorage.setItem('careverify_role', role);
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+
+</html>
