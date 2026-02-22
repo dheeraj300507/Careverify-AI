@@ -151,7 +151,7 @@ def standalone_upload():
     }), 200
 
 
-@documents_bp.route("/upload-medical-record", methods=["POST"])
+@documents_bp.route("/upload-medical-record", methods=["POST"], strict_slashes=False)
 def upload_medical_record():
     """
     Intelligent endpoint for medical record upload and claim revalidation.
@@ -159,153 +159,169 @@ def upload_medical_record():
     AI findings for immediate workflow updates in the review UI.
     """
     from werkzeug.utils import secure_filename
+    import traceback
 
-    claim_id = request.form.get("claim_id")
-    file = request.files.get("file")
+    try:
+        claim_id = (request.form.get("claim_id") or "").strip()
+        file = request.files.get("file")
 
-    if not file:
-        return jsonify({"status": "error", "message": "No file provided"}), 400
+        if not file or not file.filename:
+            return jsonify({"status": "error", "message": "No file uploaded"}), 400
 
-    if file.filename == "":
-        return jsonify({"status": "error", "message": "Empty filename"}), 400
+        # Validate file type
+        allowed_exts = {"pdf", "png", "jpg", "jpeg"}
+        ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+        if ext not in allowed_exts:
+            return jsonify({"status": "error", "message": f"File type not allowed. Supported: {', '.join(allowed_exts)}"}), 422
 
-    # Validate file type
-    allowed_exts = {"pdf", "png", "jpg", "jpeg"}
-    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
-    if ext not in allowed_exts:
-        return jsonify({"status": "error", "message": f"File type not allowed. Supported: {', '.join(allowed_exts)}"}), 422
+        if not claim_id:
+            return jsonify({"status": "error", "message": "claim_id is required for claim revalidation"}), 422
 
-    if not claim_id:
-        return jsonify({"status": "error", "message": "claim_id is required for claim revalidation"}), 422
+        file_bytes = file.read()
+        file_size = len(file_bytes)
+        if file_size <= 0:
+            return jsonify({"status": "error", "message": "Uploaded file is empty"}), 400
 
-    supabase = get_supabase_admin()
-    claim = supabase.table("claims").select("id, hospital_org_id, status").eq("id", claim_id).single().execute().data
-    if not claim:
-        return jsonify({"status": "error", "message": "Claim not found", "claim_id": claim_id}), 404
+        max_size = current_app.config.get("MAX_CONTENT_LENGTH", 50 * 1024 * 1024)
+        if file_size > max_size:
+            return jsonify({"status": "error", "message": f"File too large. Maximum: {max_size // 1024 // 1024}MB"}), 413
 
-    # Ensure uploads directory exists
-    upload_dir = os.path.join(current_app.root_path, "..", "uploads")
-    if not os.path.exists(upload_dir):
+        supabase = get_supabase_admin()
+        claim_rows = (
+            supabase.table("claims")
+            .select("id, hospital_org_id, status")
+            .eq("id", claim_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if not claim_rows:
+            return jsonify({"status": "error", "message": "Claim not found", "claim_id": claim_id}), 404
+
+        # Ensure uploads directory exists
+        upload_dir = os.path.join(current_app.root_path, "..", "uploads")
         os.makedirs(upload_dir, exist_ok=True)
 
-    # Save file Locally
-    safe_name = secure_filename(file.filename)
-    unique_name = f"{uuid.uuid4().hex[:8]}_{safe_name}"
-    file_path = os.path.join(upload_dir, unique_name)
-    file_bytes = file.read()
-    file_size = len(file_bytes)
-    file.stream.seek(0)
-    file.save(file_path)
+        # Save file locally
+        safe_name = secure_filename(file.filename) or f"upload_{uuid.uuid4().hex}"
+        unique_name = f"{uuid.uuid4().hex[:8]}_{safe_name}"
+        file_path = os.path.join(upload_dir, unique_name)
+        with open(file_path, "wb") as buffer:
+            buffer.write(file_bytes)
 
-    # 1) Create claim document record
-    doc_id = str(uuid.uuid4())
-    doc_record = {
-        "id": doc_id,
-        "claim_id": claim_id,
-        "document_type": request.form.get("document_type", "supporting_document"),
-        "file_name": file.filename,
-        "storage_path": f"local://{unique_name}",
-        "file_size_bytes": file_size,
-        "mime_type": file.mimetype,
-        "checksum": hashlib.sha256(file_bytes).hexdigest(),
-        "created_at": datetime.utcnow().isoformat(),
-        "ocr_extracted": False,
-    }
-    supabase.table("claim_documents").insert(doc_record).execute()
+        # 1) Create claim document record
+        doc_id = str(uuid.uuid4())
+        doc_record = {
+            "id": doc_id,
+            "claim_id": claim_id,
+            "document_type": request.form.get("document_type", "supporting_document"),
+            "file_name": file.filename,
+            "storage_path": f"local://{unique_name}",
+            "file_size_bytes": file_size,
+            "mime_type": file.mimetype,
+            "checksum": hashlib.sha256(file_bytes).hexdigest(),
+            "created_at": datetime.utcnow().isoformat(),
+            "ocr_extracted": False,
+        }
+        supabase.table("claim_documents").insert(doc_record).execute()
 
-    # 2) OCR extraction
-    ocr_pipeline = get_ocr_pipeline()
-    ocr_result = ocr_pipeline.process(file_bytes, file.mimetype or "application/octet-stream")
-    ocr_data = ocr_result.structured_data or {}
-    ocr_text = ocr_result.raw_text or ""
-    if not ocr_text:
-        ocr_text = (
-            f"Medical document {file.filename}. Diagnosis M17.11. Procedure 27447. "
-            "Prior Authorization #8821. NPI 1234567890."
+        # 2) OCR extraction
+        ocr_pipeline = get_ocr_pipeline()
+        ocr_result = ocr_pipeline.process(file_bytes, file.mimetype or "application/octet-stream")
+        ocr_data = ocr_result.structured_data or {}
+        ocr_text = ocr_result.raw_text or ""
+        if not ocr_text:
+            ocr_text = (
+                f"Medical document {file.filename}. Diagnosis M17.11. Procedure 27447. "
+                "Prior Authorization #8821. NPI 1234567890."
+            )
+
+        supabase.table("claim_documents").update(
+            {
+                "ocr_extracted": True,
+                "ocr_text": ocr_text,
+                "ocr_confidence": ocr_result.confidence,
+                "ocr_data": ocr_data,
+            }
+        ).eq("id", doc_id).execute()
+
+        # 3) Attach upload + audit trail
+        AuditService.log_system(
+            event_type="document_uploaded",
+            resource_type="claim_document",
+            resource_id=doc_id,
+            event_data={
+                "claim_id": claim_id,
+                "file_name": file.filename,
+                "storage_path": f"local://{unique_name}",
+                "ocr_confidence": ocr_result.confidence,
+            },
         )
 
-    supabase.table("claim_documents").update(
-        {
-            "ocr_extracted": True,
-            "ocr_text": ocr_text,
-            "ocr_confidence": ocr_result.confidence,
-            "ocr_data": ocr_data,
-        }
-    ).eq("id", doc_id).execute()
+        # 4) Trigger intelligent revalidation
+        revalidator = get_revalidation_service()
+        revalidation_result = revalidator.revalidate_claim(claim_id, doc_id)
+        if revalidation_result.get("status") == "error":
+            return jsonify(revalidation_result), 422
 
-    # 3) Attach upload + audit trail
-    AuditService.log_system(
-        event_type="document_uploaded",
-        resource_type="claim_document",
-        resource_id=doc_id,
-        event_data={
+        # 5) Audit workflow automation updates
+        AuditService.log_system(
+            event_type="claim_updated",
+            resource_type="claim",
+            resource_id=claim_id,
+            event_data={
+                "trigger": "upload_revalidation",
+                "workflow_stage": revalidation_result.get("workflow_stage"),
+                "claim_status": revalidation_result.get("claim_status"),
+                "reviewer_suggestion": revalidation_result.get("reviewer_suggestion"),
+                "auto_approval_eligible": revalidation_result.get("auto_approval_eligible"),
+            },
+        )
+
+        return jsonify({
+            "status": "success",
+            "message": "Upload processed and claim revalidated",
+            "analysis": "Intelligent revalidation completed with updated workflow guidance.",
+            "filename": file.filename,
             "claim_id": claim_id,
-            "file_name": file.filename,
-            "storage_path": f"local://{unique_name}",
-            "ocr_confidence": ocr_result.confidence,
-        },
-    )
-
-    # 4) Trigger intelligent revalidation
-    revalidator = get_revalidation_service()
-    revalidation_result = revalidator.revalidate_claim(claim_id, doc_id)
-
-    if revalidation_result.get("status") == "error":
-        return jsonify(revalidation_result), 422
-
-    # 5) Audit workflow automation updates
-    AuditService.log_system(
-        event_type="claim_updated",
-        resource_type="claim",
-        resource_id=claim_id,
-        event_data={
-            "trigger": "upload_revalidation",
-            "workflow_stage": revalidation_result.get("workflow_stage"),
-            "claim_status": revalidation_result.get("claim_status"),
-            "reviewer_suggestion": revalidation_result.get("reviewer_suggestion"),
-            "auto_approval_eligible": revalidation_result.get("auto_approval_eligible"),
-        },
-    )
-
-    return jsonify({
-        "status": "success",
-        "message": "Upload processed and claim revalidated",
-        "analysis": "Intelligent revalidation completed with updated workflow guidance.",
-        "filename": file.filename,
-        "claim_id": claim_id,
-        "document": {
-            "id": doc_id,
-            "file_name": file.filename,
-            "storage_path": f"local://{unique_name}",
-            "ocr_extracted": True,
-            "ocr_confidence": ocr_result.confidence,
-        },
-        "pipeline": {
-            "stage": revalidation_result.get("workflow_stage"),
-            "claim_status": revalidation_result.get("claim_status"),
-            "revalidation_status": revalidation_result.get("status"),
-        },
-        "findings": {
-            "extracted_medical_facts": revalidation_result.get("extracted_medical_facts", {}),
-            "matched_policies": revalidation_result.get("matched_policies", []),
-            "detected_risks": revalidation_result.get("detected_risks", []),
-            "violation_flags": revalidation_result.get("violation_flags", []),
-            "approval_recommendation": revalidation_result.get("recommendation"),
-            "confidence_score": revalidation_result.get("confidence_score"),
-            "trust_score": revalidation_result.get("trust_score"),
-            "reviewer_suggestion": revalidation_result.get("reviewer_suggestion"),
-            "auto_approval_eligible": revalidation_result.get("auto_approval_eligible"),
-        },
-        "claim_update": {
-            "status": revalidation_result.get("claim_status"),
-            "workflow_stage": revalidation_result.get("workflow_stage"),
-            "recommendation": revalidation_result.get("recommendation"),
-            "confidence_score": revalidation_result.get("confidence_score"),
-            "trust_score": revalidation_result.get("trust_score"),
-            "auto_approval_eligible": revalidation_result.get("auto_approval_eligible"),
-        },
-        "revalidation": revalidation_result,
-    }), 200
+            "document": {
+                "id": doc_id,
+                "file_name": file.filename,
+                "storage_path": f"local://{unique_name}",
+                "ocr_extracted": True,
+                "ocr_confidence": ocr_result.confidence,
+            },
+            "pipeline": {
+                "stage": revalidation_result.get("workflow_stage"),
+                "claim_status": revalidation_result.get("claim_status"),
+                "revalidation_status": revalidation_result.get("status"),
+            },
+            "findings": {
+                "extracted_medical_facts": revalidation_result.get("extracted_medical_facts", {}),
+                "matched_policies": revalidation_result.get("matched_policies", []),
+                "detected_risks": revalidation_result.get("detected_risks", []),
+                "violation_flags": revalidation_result.get("violation_flags", []),
+                "approval_recommendation": revalidation_result.get("recommendation"),
+                "confidence_score": revalidation_result.get("confidence_score"),
+                "trust_score": revalidation_result.get("trust_score"),
+                "reviewer_suggestion": revalidation_result.get("reviewer_suggestion"),
+                "auto_approval_eligible": revalidation_result.get("auto_approval_eligible"),
+            },
+            "claim_update": {
+                "status": revalidation_result.get("claim_status"),
+                "workflow_stage": revalidation_result.get("workflow_stage"),
+                "recommendation": revalidation_result.get("recommendation"),
+                "confidence_score": revalidation_result.get("confidence_score"),
+                "trust_score": revalidation_result.get("trust_score"),
+                "auto_approval_eligible": revalidation_result.get("auto_approval_eligible"),
+            },
+            "revalidation": revalidation_result,
+        }), 200
+    except Exception as e:
+        print(traceback.format_exc())
+        current_app.logger.exception("upload_medical_record failed")
+        return jsonify({"status": "error", "detail": str(e)}), 500
 
 
 @documents_bp.route("/claims/<claim_id>/documents", methods=["GET"])

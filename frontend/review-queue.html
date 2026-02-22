@@ -824,16 +824,7 @@
                 Risk Scoring
             </a>
 
-            <span class="sidebar-section">Compliance</span>
-            <a class="sidebar-item" href="#">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-                Compliance Review
-            </a>
+
         </aside>
 
         <!-- Main Workspace -->
@@ -1108,6 +1099,19 @@
             }, 2800);
         }
 
+        const API_BASE_URL = (() => {
+            const host = window.location.hostname;
+            const port = window.location.port;
+            const protocol = window.location.protocol;
+            const isLocalHost = host === 'localhost' || host === '127.0.0.1';
+            const isBackendOrigin = isLocalHost && port === '5000';
+            const isReverseProxyOrigin = port === '' || port === '80' || port === '443';
+            if (protocol === 'file:' || (isLocalHost && !isBackendOrigin && !isReverseProxyOrigin)) {
+                return 'http://127.0.0.1:5000';
+            }
+            return '';
+        })();
+
         // STEP 3 — DRAG & DROP LOGIC
         const uploadArea = document.getElementById('uploadArea');
         const uploadText = document.getElementById('uploadText');
@@ -1242,14 +1246,23 @@
             }
 
             try {
-                // Using relative path for robustness across environments
-                const response = await fetch('/api/upload-medical-record', {
+                const response = await fetch(`${API_BASE_URL}/api/upload-medical-record`, {
                     method: 'POST',
                     body: formData
                 });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || `Server returned ${response.status}`);
+                const rawBody = await response.text();
+                let data = {};
+                if (rawBody) {
+                    try {
+                        data = JSON.parse(rawBody);
+                    } catch (_parseErr) {
+                        data = { message: rawBody };
+                    }
+                }
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || `Server returned ${response.status}`);
+                }
                 showToast(`Revalidation Complete: ${data.analysis || data.message || 'Done'}`);
 
                 // DYNAMIC UI UPDATE: Update Findings Panel
@@ -1293,4 +1306,3 @@
 </body>
 
 </html>
-

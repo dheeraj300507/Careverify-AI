@@ -53,9 +53,18 @@ class RevalidationService:
         extractor = get_extraction_service()
         engine = get_ai_engine()
 
-        claim = supabase.table("claims").select("*").eq("id", claim_id).single().execute().data
-        if not claim:
+        claim_rows = (
+            supabase.table("claims")
+            .select("*")
+            .eq("id", claim_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if not claim_rows:
             return {"status": "error", "message": "Claim not found", "claim_id": claim_id}
+        claim = claim_rows[0]
 
         docs = (
             supabase.table("claim_documents")
@@ -188,7 +197,13 @@ class RevalidationService:
             "processing_time_ms": ensemble_result.processing_time_ms,
             "model_config": {"pipeline": "upload_revalidation"},
         }
-        supabase.table("ai_results").insert(ai_record).execute()
+        try:
+            supabase.table("ai_results").insert(ai_record).execute()
+        except Exception as exc:
+            logger.warning(
+                f"[Revalidation] Failed to persist ai_results for claim {claim_id}; "
+                f"continuing without blocking workflow: {exc}"
+            )
 
         AuditService.log_system(
             event_type="ai_analysis_completed",

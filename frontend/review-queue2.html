@@ -875,7 +875,8 @@
                     <!-- Left: Claim Queue -->
                     <div class="queue-panel" id="queueList">
                         <!-- Claim 1: Critical -->
-                        <div class="claim-card high-risk selected" onclick="selectClaim(this)">
+                        <div class="claim-card high-risk selected" data-claim-id="99214000-0000-0000-0000-000000000000"
+                            onclick="selectClaim(this)">
                             <div class="claim-dot dot-red"></div>
                             <div class="claim-meta">
                                 <span class="claim-id">CLM-99214</span>
@@ -891,7 +892,8 @@
                         </div>
 
                         <!-- Claim 2: Amber -->
-                        <div class="claim-card high-risk" onclick="selectClaim(this)">
+                        <div class="claim-card high-risk" data-claim-id="88305000-0000-0000-0000-000000000000"
+                            onclick="selectClaim(this)">
                             <div class="claim-dot dot-amber"></div>
                             <div class="claim-meta">
                                 <span class="claim-id">CLM-88305</span>
@@ -907,7 +909,8 @@
                         </div>
 
                         <!-- Claim 3: Green -->
-                        <div class="claim-card" onclick="selectClaim(this)">
+                        <div class="claim-card" data-claim-id="77098000-0000-0000-0000-000000000000"
+                            onclick="selectClaim(this)">
                             <div class="claim-dot dot-green"></div>
                             <div class="claim-meta">
                                 <span class="claim-id">CLM-77098</span>
@@ -1037,9 +1040,15 @@
 
     <script>
         // STEP 1 — SELECT CLAIM
+        let selectedClaimId = "99214000-0000-0000-0000-000000000000";
+
         function selectClaim(el) {
             document.querySelectorAll('.claim-card').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
+            const claimFromCard = el.getAttribute('data-claim-id');
+            if (claimFromCard) {
+                selectedClaimId = claimFromCard;
+            }
         }
 
         // STEP 2 — TOAST NOTIFICATIONS
@@ -1054,6 +1063,19 @@
                 t.style.transform = 'translateX(-50%) translateY(20px)';
             }, 2800);
         }
+
+        const API_BASE_URL = (() => {
+            const host = window.location.hostname;
+            const port = window.location.port;
+            const protocol = window.location.protocol;
+            const isLocalHost = host === 'localhost' || host === '127.0.0.1';
+            const isBackendOrigin = isLocalHost && port === '5000';
+            const isReverseProxyOrigin = port === '' || port === '80' || port === '443';
+            if (protocol === 'file:' || (isLocalHost && !isBackendOrigin && !isReverseProxyOrigin)) {
+                return 'http://127.0.0.1:5000';
+            }
+            return '';
+        })();
 
         // STEP 3 — DRAG & DROP LOGIC
         const uploadArea = document.getElementById('uploadArea');
@@ -1111,22 +1133,35 @@
 
             const formData = new FormData();
             formData.append('file', file);
+            if (selectedClaimId) {
+                formData.append('claim_id', selectedClaimId);
+            }
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/upload-medical-record', {
+                const response = await fetch(`${API_BASE_URL}/api/upload-medical-record`, {
                     method: 'POST',
                     body: formData
                 });
 
-                if (!response.ok) throw new Error(`Server returned ${response.status}`);
-                const data = await response.json();
+                const rawBody = await response.text();
+                let data = {};
+                if (rawBody) {
+                    try {
+                        data = JSON.parse(rawBody);
+                    } catch (_parseErr) {
+                        data = { message: rawBody };
+                    }
+                }
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || `Server returned ${response.status}`);
+                }
 
                 console.log("AI Result:", data);
-                showToast(`Success: ${data.analysis}`);
+                showToast(`Success: ${data.analysis || data.message || 'Upload processed'}`);
 
             } catch (err) {
                 console.error("Upload failed:", err);
-                showToast("Connection Error: Backend unavailable.");
+                showToast(`Upload failed: ${err.message}`);
             } finally {
                 // Reset UI
                 uploadText.textContent = originalText;

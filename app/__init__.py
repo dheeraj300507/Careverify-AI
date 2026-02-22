@@ -1,7 +1,9 @@
 import os
 import logging
+import traceback
 from flask import Flask, jsonify
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
 from config.settings import config_map
 from app.extensions import init_extensions
 
@@ -33,8 +35,28 @@ def create_app(config_name="production"):
 
     # Register Blueprints safely
     register_blueprints(app)
+    register_error_handlers(app)
     
     return app
+
+def register_error_handlers(app):
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(exc):
+        return jsonify({
+            "status": "error",
+            "message": exc.description,
+            "code": exc.code,
+        }), exc.code
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_exception(exc):
+        app.logger.exception("Unhandled exception")
+        print(traceback.format_exc())
+        return jsonify({
+            "status": "error",
+            "message": str(exc),
+            "code": 500,
+        }), 500
 
 def register_blueprints(app):
     """Register all blueprints with error handling to ensure server starts."""
